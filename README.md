@@ -75,9 +75,11 @@ $$f(x) = x * w$$
     ```y = x*w + b```
 
 * Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
+    
     ```distance = y - tdy```
 
 * Let's accumulate the squres of `distance` into `train_error`
+    
     ```trainError = trainError + (distance*distance)```
 
 * Using squared distances we achieve:
@@ -242,9 +244,11 @@ $$\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=1-\sigma(-x)$$
     ```y = sigmoid(x1*w1 + x2*w2 + b)```
 
 * Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
-    ```distance = y - tdy``
+
+    ```distance = y - tdy```
 
 * Let's accumulate the squres of `distance` into `train_error`
+
     ```trainError = trainError + (distance*distance)```
 
 * Using squared distances we achieve:
