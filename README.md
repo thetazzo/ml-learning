@@ -140,7 +140,7 @@ $$\$$
 * We do this as we drive the parameter `h` towords 0.
       
 * From the definition of `finite difference` we know:
-    $$△_h[f](x)=f(x - h) - f(x)$$
+$$△_h[f](x)=f(x - h) - f(x)$$
 
 * Let's combine both ideas to compute the error distance of our cost (`dw`) and the error distance of our bias (`db`)
     $$dw=\frac{(cost(w + eps, b) - cost(w, b))}{eps}$$
@@ -238,7 +238,8 @@ $$\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=1-\sigma(-x)$$
 * For each row the training alghoritem will take the input parameters of the training data as `x1` and `x2` and multiply them by the coresponding `w1` and `w2` then let's add to the sum of multiplications the bias parameter `b` 
 * Next step is to forward the whole sum through the activation function (sigmoid)
 * Store the final result into `y`
-    $$y = sigmoid(x1*w1 + x2*w2 + b)$$
+
+$$y = sigmoid(x1*w1 + x2*w2 + b)$$
 
 * Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
 $$distance = y - tdy$$
