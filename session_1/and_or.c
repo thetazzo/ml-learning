@@ -25,7 +25,14 @@ float and_td[][3] = {
     {1,1,1},
 };
 
-#define train_data and_td
+float nand_td[][3] = {
+    {0,0,1},
+    {0,1,1},
+    {1,0,1},
+    {1,1,0},
+};
+
+#define train_data nand_td
 
 float rand_float(void)
 {
