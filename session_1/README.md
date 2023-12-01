@@ -1,21 +1,13 @@
-# Machine Learning 
+
+# Session 01 
 
 ```
-Exploring the relm of machine Learning
-
 1. Create and run tests
 2. Gather data
 2. Construct a mathematical model 
 3. Tweak around the model to make it work better with the data and move closer to the desired result
 4. This tweaked model is a neural network
 ```
-
----
-
-## TABLE OF CONTENTS
-
-* [Session 01]{./session_1/README.md} 
-
 ---
 
 ## Artificial neurons
