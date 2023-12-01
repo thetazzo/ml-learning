@@ -72,20 +72,20 @@ $$f(x) = x * w$$
 * Note: Here we are not using any activation functions (bad idea)
 * Store the final result into `y`
 
-$$y = x*w + b$$
+    $$y = x*w + b$$
 
 * Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
-$$distance = y - tdy$$
+    $$distance = y - tdy$$
 
 * Let's accumulate the squres of `distance` into `train_error`
-$$train\_error = train\_error + (distance*distance)$$
+    $$train\_error = train\_error + (distance*distance)$$
 
 * Using squared distances we achieve:
     * **absolute values** ~ we squre the distance is so that we don't have to deal with negative numbers 
     * **aplified errors** ~ we square the distance is so that any large offset from the desired output is amplified  
     
 * After we traverse all of the traning data and have accumulated the ``train_error`` we want to normalize the error (find it's average) so we devide it by the amount of training data
-$$train\_error = \frac{train\_error}{train\_count}$$
+    $$train\_error = \frac{train\_error}{train\_count}$$
 
 * ``train_error`` is a messure of how badly our model performs
     * the larger the ``train_error`` the worse the model performs
@@ -239,20 +239,20 @@ $$\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=1-\sigma(-x)$$
 * Next step is to forward the whole sum through the activation function (sigmoid)
 * Store the final result into `y`
 
-$$y = sigmoid(x1*w1 + x2*w2 + b)$$
+    $$y = sigmoid(x1*w1 + x2*w2 + b)$$
 
 * Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
-$$distance = y - tdy$$
+    $$distance = y - tdy$$
 
 * Let's accumulate the squres of `distance` into `train_error`
-$$train\_error = train\_error + (distance*distance)$$
+    $$train\_error = train\_error + (distance*distance)$$
 
 * Using squared distances we achieve:
     * **absolute values** ~ we squre the distance is so that we don't have to deal with negative numbers 
     * **aplified errors** ~ we square the distance is so that any large offset from the desired output is amplified  
     
 * After we traverse all of the traning data and have accumulated the ``train_error`` we want to normalize the error (find it's average) so we devide it by the amount of training data
-$$train\_error = \frac{train\_error}{train\_count}$$
+    $$train\_error = \frac{train\_error}{train\_count}$$
 
 * ``train_error`` is a messure of how badly our model performs
     * the larger the ``train_error`` the worse the model performs
