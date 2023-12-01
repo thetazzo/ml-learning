@@ -2,17 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
-/**
- * 1 2
- * 2 4
- * 3 6
- * 4 8
- *
- * x*w = y
- */
+#include <math.h>
 
 #define ARRAY_LEN(xs) sizeof(xs)/sizeof(xs[0])
+
 
 float train_data[][2] = {
     {0, 0},
