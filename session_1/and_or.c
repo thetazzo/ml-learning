@@ -25,7 +25,7 @@ float and_td[][3] = {
     {1,1,1},
 };
 
-#define train_data or_td
+#define train_data and_td
 
 float rand_float(void)
 {
@@ -56,7 +56,7 @@ void train(float *w1, float *w2, float *b, size_t titer, float eps, float rate)
         *w1 -= rate*dw1;
         *w2 -= rate*dw2;
         *b  -= rate*db;
-        //printf("cost: %f, w1: %f, w2: %f, b: %f\n", cost(*w1, *w2, *b), *w1, *w2, *b);
+        // printf("cost: %f, w1: %f, w2: %f, b: %f\n", cost(*w1, *w2, *b), *w1, *w2, *b);
     }
 }
 
@@ -73,6 +73,7 @@ int main()
 
     train(&w1, &w2, &b, 1000*1000, eps, rate);
     printf("--------------------------------\n");
+
     printf("c: %f, w1: %f, w2: %f, b: %f\n", cost(w1, w2, b), w1, w2, b);
 
     for (size_t i = 0; i <= 1; ++i) {
@@ -83,7 +84,7 @@ int main()
             } else {
                 y = 0;
             }
-            printf("%zu & %zu: %f\n", i, j, y);
+            printf("%zu | %zu: %f\n", i, j, y);
         }
     }
 

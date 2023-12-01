@@ -26,6 +26,11 @@ Exploring the relm of machine Learning
 * Usually in the last step we put the sum through a *non-linear function* known as an activation function that produces the output
 * Activation functions usually have a **sigmoid shape** but they may also take the form of other non-linear functions, *picewise linear functions* or *step-functions* 
 
+### Why is the bias important 
+* *You need the bias because the model without it would not be able to fit the data better*
+* *Bias helps you control at which value the activation function will trigger*
+* If you don't have the bias the model can only modify the output based on the inpur parameters (weights) but if you introduce bias into the equation the model is capbale of shifting the entire state regardles of the input 
+
 ---
 
 ## Finite difference

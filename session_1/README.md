@@ -1,23 +1,6 @@
 
 # Session 01 
 
-```
-1. Create and run tests
-2. Gather data
-2. Construct a mathematical model 
-3. Tweak around the model to make it work better with the data and move closer to the desired result
-4. This tweaked model is a neural network
-```
----
-
-## Artificial neurons
-* **Artificial neurons** are the basic building blocks of any artificial neural network ~ `elementary units`
-* An **artificial neuron** recieves one or more inputs and sums them to produce an output or so called `activation` 
-* Usually each input has it's own separate `weight`
-* And the sum is often added to a value know as `bias` ~ a value that is not dependent on the input and gives the final result of sum the needed offset before forwarding it into the activation function 
-* Usually in the last step we put the sum through a *non-linear function* known as an activation function that produces the output
-* Activation functions usually have a **sigmoid shape** but they may also take the form of other non-linear functions, *picewise linear functions* or *step-functions* 
-
 ---
 
 ## Twice
@@ -206,21 +189,6 @@ $$f(x) = x1 * w1 + x2*w2$$
 * Let's initialize the parameter `w1`, `w2`, `b` as some *random float* value.
 
 ---
-
-## Activation function
-* After an **arificial neuron** sums up all of it's weights and adds it's bias the ouput is forwards the sum through an **activation function** 
-* The goal of the activation function is to take the summed up data, that can possably unbound or  "all over the place", and so to say isolate the value (exaple between 0 and 1) and make it non-linear.
-* One of the standard activation functions is named `Sigmoid`
-
-### Sigmoid
-* *It's any mathematical function that hasi the characteristic "S"-shaped curve or sigmoid curve.* 
-* In our case we will look at a sigmoid function that maps values from `-Infinity` to `+Infinity` to values from `0` to `1`
-    * The closer you are to `-Infinity` the closer you are to `0`
-    * The closer you are to `+Infinity` the closer you are to `1`
-* Let's take a look at a common example of a sigmoid function ~ `Logistic function`
-$$\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=1-\sigma(-x)$$
-
---- 
 
 ## Cost function ~ Artificial Neuron With Two Connections 
 
