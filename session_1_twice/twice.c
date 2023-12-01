@@ -56,16 +56,19 @@ void train(float *w, float *b, size_t titer, float eps, float rate)
 int main() 
 {
     srand(time(0));
+
     float w = rand_float()*10.0f;
     float b = 0;
-    //float w = -2.0f; 
+
     float eps = 1e-3;
     float rate = 1e-3;
 
     train(&w, &b, 900, eps, rate);
     printf("--------------------------------\n");
+
     printf("w: %f, b: %f\n", w, b);
     printf("--------------------------------\n");
+
     printf("f(x) = x * w:\n");
     for (size_t i = 0; i < 5; ++i) {
         int y = i*w+b;
