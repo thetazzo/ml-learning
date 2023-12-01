@@ -72,13 +72,13 @@ $$f(x) = x * w$$
 * Note: Here we are not using any activation functions (bad idea)
 * Store the final result into `y`
 
-    ``y = x*w + b``
+    ```y = x*w + b```
 
 * Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
-    ``distance = y - tdy``
+    ```distance = y - tdy```
 
 * Let's accumulate the squres of `distance` into `train_error`
-    ``train_error = train_error + (distance*distance)``
+    ```trainError = trainError + (distance*distance)```
 
 * Using squared distances we achieve:
     * **absolute values** ~ we squre the distance is so that we don't have to deal with negative numbers 
@@ -239,13 +239,13 @@ $$\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=1-\sigma(-x)$$
 * Next step is to forward the whole sum through the activation function (sigmoid)
 * Store the final result into `y`
 
-    ``y = sigmoid(x1*w1 + x2*w2 + b)``
+    ```y = sigmoid(x1*w1 + x2*w2 + b)```
 
 * Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
-    ``distance = y - tdy``
+    ```distance = y - tdy``
 
 * Let's accumulate the squres of `distance` into `train_error`
-    ``trainError = trainError + (distance*distance)``
+    ```trainError = trainError + (distance*distance)```
 
 * Using squared distances we achieve:
     * **absolute values** ~ we squre the distance is so that we don't have to deal with negative numbers 
