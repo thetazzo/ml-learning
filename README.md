@@ -71,6 +71,7 @@ $$f(x) = x * w$$
 * For each row the training alghoritem will take the input parameter of the training data as ``x``  and multiply it by the given `w` and add the bias parameter `b` to the multiplication
 * Note: Here we are not using any activation functions (bad idea)
 * Store the final result into `y`
+
 $$y = x*w + b$$
 
 * Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
