@@ -28,7 +28,7 @@ XOR:
     * Neural networks with only one neuron cannot usually solve problems that are not linearly separable.
 
 * We can describe XOR with OR, AND, NAND
-    ```math
+    ```
     XOR = (x|y) & ~(x&y)
     ```
 * Let's make one neuron to do the **OR** gate and another to do the **NAND** gate.
