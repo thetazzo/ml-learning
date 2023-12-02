@@ -39,7 +39,7 @@ $$\begin{bmatrix} x_1 & x_2 \end{bmatrix} \cdot \begin{bmatrix} w_{11} & w_{12} 
 * The resulting matrix will have as many rows as the first matrix and the amount of colums as the second matrix
 * Each value in each row of the first matrix we multiply with each value in each column in the second matrix and then we sum them up
 
-$$c_{ij} = \Sigma^{n}_{k=1}a_{ik}b_{kj}$$
+$$c_{ij} = \sum_{k=1}^{n}a_{ik}b_{kj}$$
 
 * where $c_{ij}$ is the output entry of the product of the i-th row of the first matrix and j-th column of the second matrix
 * The second step is to perform matrix addition between the resulting matrix form the first step and the `biases matrix` ~ `B`
