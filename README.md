@@ -16,6 +16,7 @@ Exploring the relm of machine Learning
 
 * [Session 1](./session_1/README.md) 
 * [Session 2](./session_2/README.md) 
+* [Session 3](./session_3/README.md) 
 
 ---
 
