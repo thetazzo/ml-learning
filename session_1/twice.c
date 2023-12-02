@@ -6,7 +6,6 @@
 
 #define ARRAY_LEN(xs) sizeof(xs)/sizeof(xs[0])
 
-
 float train_data[][2] = {
     {0, 0},
     {1, 2},

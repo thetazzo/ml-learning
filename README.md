@@ -14,7 +14,8 @@ Exploring the relm of machine Learning
 
 ## TABLE OF CONTENTS
 
-* [Session 01](./session_1/README.md) 
+* [Session 1](./session_1/README.md) 
+* [Session 2](./session_2/README.md) 
 
 ---
 
