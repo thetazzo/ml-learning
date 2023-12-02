@@ -10,20 +10,20 @@ One is not enough
 * Let's try to simulate the XOR gate 
 ```
 XOR:
-    0 0 -> 0
-    0 1 -> 1
-    1 0 -> 1
-    1 1 -> 0
+   0 0 | 0
+   0 1 | 1
+   1 0 | 1
+   1 1 | 0
 ```
 * A special feature of the XOR gate is that it cannot usually be simulated with only one **neuron**.
     * This is because XOR is not linearly separable -> XOR has values that are equally distributed, by this I mean that XOR contains two sets of values that are equally large.
     ```
         |---------|
-       1|X O|
-        | |
-       0|O X|
+       1|X       O|
+        |         |
+       0|O       X|
         |_________|
-         0 1
+         0       1
     ```
     * Neural networks with only one neuron cannot usually solve problems that are not linearly separable.
 
