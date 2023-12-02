@@ -86,7 +86,7 @@ $$f(x) = x * w$$
 
 * Let's introduce a value `eps` (eplison).
     * This value should be small and will be used to optimise our parameter `w`.
-    * Let's use the value of `eps` to move our parameter `w
+    * Let's use the value of `eps` to move our parameter `w`
         $$w = w - eps$$
         or
         $$w = w + eps$$
@@ -105,7 +105,6 @@ $$f(x) = x * w$$
 * A thought about the `finite difference method`: 
     * We should remember that this method is not used in the field of neural networks because it is **slow** and **inaccurate**.
     In contrast, the *finite difference* method can be used as part of our learning process when trying to understand how neural networks work.
-$$\$$
 * Let's recap:  Right now we are trying to find the `minimum` of the `cost function` by looking in which direction we want to move our parameter `w` so that we get the `minimum` of our `cost function`.
 
 * From the definition of derivatives we know that
@@ -123,8 +122,8 @@ $$\$$
 $$\Delta_h[f](x)=f(x - h) - f(x)$$
 
 * Let's combine both ideas to calculate the error distance of our cost (`dw`) and the error distance of our bias (`db`).
-    $$dw=\frac{\left cost(w + eps, b) - cost(w, b) \right}{eps}$$
-    $$db=\frac{(cost(w, b + eps) - cost(w, b))}{eps}$$
+    $$dw=\frac{cost(w + eps, b) - cost(w, b)}{eps}$$
+    $$db=\frac{cost( w, b + eps) - cost(w, b)}{eps}$$
 
 * Now let's adjust our parameters by subtracting `dw` from the parameter `w` and `db` from the parameter `b`. 
     $$w = w - dw$$
@@ -204,15 +203,15 @@ $$f(x) = x1 * w1 + x2*w2$$
 * Next step is to forward the whole sum through the activation function (sigmoid)
 * Store the final result into `y`
 
-    ```y = sigmoid(x1*w1 + x2*w2 + b)```
+    $$y = sigmoid(x1*w1 + x2*w2 + b)$$
 
 * Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
 
-    ```distance = y - tdy```
+    $$distance = y - tdy$$
 
 * Let's accumulate the squres of `distance` into `trainError`
 
-    ```trainError = trainError + (distance*distance)```
+    $$trainError = trainError + (distance*distance)$$
 
 * Using squared distances we achieve:
     * **absolute values** ~ we squre the distance is so that we don't have to deal with negative numbers 
