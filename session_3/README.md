@@ -28,7 +28,7 @@
 
 * Here is how we would compute the activations of the **layer 1** of our example neural network
 
-$$\sigma \left(\begin{bmatrix}x_1 & x_2\\\end{bmatrix} \cdot \begin{bmatrix} w_{11} & w_{12} \\\ w_{21} & w_{22} \end{bmatrix} + \begin{bmatrix} b_1 & b_2 \end{bmatrix}\right) = \begin{bmatrix} a_1 & a_2 \end{bmatrix}$$
+$$\sigma \left(\begin{bmatrix} x_1 & x_2 \end{bmatrix} \cdot \begin{bmatrix} w_{11} & w_{12} \\\ w_{21} & w_{22} \end{bmatrix} + \begin{bmatrix} b_1 & b_2 \end{bmatrix}\right) = \begin{bmatrix} a_1 & a_2 \end{bmatrix}$$
 
 * How would we compute such an equation:
     * The first step is to compute matrix multiplication between the `activations matrix` ~ `A` and `weights matrix` ~ `W`
