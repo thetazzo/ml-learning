@@ -65,8 +65,73 @@ $$\sigma \left(\begin{bmatrix} a_1 & a_2 \end{bmatrix} \cdot \begin{bmatrix} w_{
 ### A Thought About The Input layer
 * Form some of the definitions of how to compute layers of neural networks we could make an observation that the *input layer* could be named the **0th layer** or **layer 0** 
 * Furthermore we can deduce that **input values** $x_0$, $x_1$, ... $x_y$ are in fact `activations` of the **0th layer** $a_{01}$, $a_{02}$, ..., $a_{0y}$
+
 ---
 
 ## XOR Implementation With NeuralFramework
 
-* Still in writing ...
+---
+
+### Description Of The Neural Model
+* Let's think of a possible description that would encapsulate all the data needed to represent a neural model
+    ```
+    NeuralNetworkModel = {
+        count,
+        weights[],
+        biases[],
+        activations[]
+    }
+    ```
+    * Here we use `count` as the descriptor value of the amount of layers our neural network model will have 
+    * We use `weights[]` as the descriptor of an array of *matrices* representing all *weights* of connections in our model
+    * Similarly we use `biases[]` as the descriptor of an array of *matrices* representing all *biases* in our model
+    * Lastly we use `activations[]` as the descriptor of an array of *matrices* representing all *activations* of out model
+        * Here we should note that the amount of activations is equal to `count+1`
+        * The reason for this is that we define the *input layer* as the **0th activation**  
+
+---
+
+### How Can A Computer Construct A Neural Network Model
+* Let's define a function that will accept as inputs an integer array `architecture` and a integer `arch_count` 
+    * `architecture` array defines, as the name suggests, the architecture of our model 
+        * it is defined as an array of integers where each integer represents the amount of neurons of a layer
+        ```
+        [2, 2, 1]
+        ```
+        * Represents an architecture of a neural network where:
+            * the **0th layer** or *input layer* has `2` inputs
+            * the **1st layer** has `2` *activations* ~ has `2` *neurons* 
+            * the **2nd layer** or in this case the *output* has `1` *activation* ~ has `1` *neuron* ~ `1` output 
+    * The function will handle the allocation of memory of storing all the matrix representations 
+
+---
+
+* The learning process of our model will occure in two steps:
+    1. Calculationg a `gradient neural network` using the `finite difference` method 
+    2. Applying the `gradient neural network` to our `neural network`
+
+---
+
+### Computing Finite Difference Using Matrices ~ Gradient Neural Network
+
+* We are still using the same principle method of `finite difference` to optimize (decrease) our `cost function`  
+    * Out `cost function` still takes the the output of our current neural network and calculates the distance (*error*) from expected output in our *training data*
+* Our model stores all **weights** and **biases** as array data 
+* Let's traverse all layers of our neural network and build a new new neural network (`gradient neural network`) that will store the distances (*errors*) of our neural network 
+    * To recap how we calcualte the distance (*error*) for a single value:
+        1. We compute the cost of the neural network ~ `originalCost`
+        2. Take the value (ex. weight of bias) and tweak it by adding to it a value $\varepsilon$
+        3. compute the `newCost` cost of the neural network and from it substract the `originalCost` cost of the neural network then devide the result by the same value $\varepsilon$
+        $$\frac{(newCost - originalCost)}{\varepsilon}$$
+    * The resulting `gradient neural network` will store distances (*erros*) corresponding to all *weights* and *biases* of the neural network
+
+---
+
+### Applying The Gradient Network 
+* After calculating the gradient network applying it to the neural network is quite straight forward
+* Again let's treverse all the layers of our neural network and from each *weight* and *bias* of our neural network let's substract the corresponding distance (*error*) in the provided `gradient network` multiplied by the provided `learning rate`
+    $$W_{ij} = W_{ij} - (learningRate \ \cdot W^g_{ij})$$
+    * $W_{ij}$ is a value in the *weights* matrix of the neural network at i-th row and j-th column
+    <br></br>
+    * $W^g_{ij}$ is a value in the *weights* matrix of the `gradient neural network` at i-th row and j-th column
+ 
