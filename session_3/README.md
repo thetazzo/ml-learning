@@ -30,7 +30,7 @@
 
 $$\sigma \left(\begin{bmatrix} x_1 & x_2 \end{bmatrix} \cdot \begin{bmatrix} w_{11} & w_{12} \\\ w_{21} & w_{22} \end{bmatrix} + \begin{bmatrix} b_1 & b_2 \end{bmatrix}\right) = \begin{bmatrix} a_1 & a_2 \end{bmatrix}$$
 
-### How would we compute such an equation:
+### How would we compute such an equation
 $$\begin{bmatrix} x_1 & x_2 \end{bmatrix} \cdot \begin{bmatrix} w_{11} & w_{12} \\\ w_{21} & w_{22} \end{bmatrix}$$
 1. The first step is to compute matrix multiplication between the `activations matrix` ~ `A` and `weights matrix` ~ `W`
     * For the multiplication between matrices to be possible we must ensure that the amount of colums in the first matrix is equal to the amout of rows of the second matrix
@@ -40,8 +40,8 @@ $$\begin{bmatrix} x_1 & x_2 \end{bmatrix} \cdot \begin{bmatrix} w_{11} & w_{12} 
     * were n is the abmount of columns in the second matrix
     * where $c_{ij}$ is the output entry of the product of the i-th row of the first matrix and j-th column of the second matrix
 ---
-
 $$\begin{bmatrix} (x_1 \cdot w_{11} + x_2 \cdot w_{21}) & (x_1 \cdot w_{12} + x_2 \cdot w_{22}) \end{bmatrix} + \begin{bmatrix} b_1 & b_2 \end{bmatrix}$$
+
 2. The second step is to perform matrix addition between the resulting matrix form the first step and the `biases matrix` ~ `B`
     * Here we must ensure that both matrices are of the same *order* this means that both matices have the same amount of rows and columns
     * The sum output matrix is produced by summing up all of the corresponding terms in the matrices
