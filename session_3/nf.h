@@ -1,18 +1,18 @@
-#ifndef NL_H_
-#define NL_H_ 
+#ifndef NF_H_
+#define NF_H_ 
 
 #include <stddef.h>
 #include <stdio.h>
 
-#ifndef NL_MALLOC
+#ifndef NF_MALLOC
 #include <stdlib.h>
-#define NL_MALLOC malloc
-#endif // NL_MALLOC
+#define NF_MALLOC malloc
+#endif // NF_MALLOC
 
-#ifndef NL_ASSERT
+#ifndef NF_ASSERT
 #include <assert.h>
-#define NL_ASSERT assert
-#endif // NL_ASSERT
+#define NF_ASSERT assert
+#endif // NF_ASSERT
 
 float rand_float(void);
 
@@ -25,25 +25,25 @@ typedef struct {
     size_t cols;
     size_t stride;
     float  *es;
-} NL_Mat;
+} NF_Mat;
 
 #define MAT_AT(m, i, j) (m).es[(i)*(m).cols + (j)]
 
 /**
  * Allocate memory for a matrix
  */
-NL_Mat nl_mat_alloc(size_t rows, size_t cols);
+NF_Mat nl_mat_alloc(size_t rows, size_t cols);
 
-void nl_mat_rand(NL_Mat m, float low, float high);
-void nl_mat_fill(NL_Mat m, float a);
+void nl_mat_rand(NF_Mat m, float low, float high);
+void nl_mat_fill(NF_Mat m, float a);
 
-void nl_mat_dot(NL_Mat dst, NL_Mat a, NL_Mat b);
-void nl_mat_sum(NL_Mat dst, NL_Mat a);
-void nl_mat_print(NL_Mat m);
+void nl_mat_dot(NF_Mat dst, NF_Mat a, NF_Mat b);
+void nl_mat_sum(NF_Mat dst, NF_Mat a);
+void nl_mat_print(NF_Mat m);
 
-#endif // NL_H_
+#endif // NF_H_
 
-#ifdef NL_IMPLEMENTATION
+#ifdef NF_IMPLEMENTATION
 
 /**
  * -------------------------------------
@@ -61,17 +61,17 @@ float rand_float(void)
  * -------------------------------------
  */
 
-NL_Mat nl_mat_alloc(size_t rows, size_t cols)
+NF_Mat nl_mat_alloc(size_t rows, size_t cols)
 {
-    NL_Mat m = {0}; 
+    NF_Mat m = {0}; 
     m.rows = rows;
     m.cols = cols;
-    m.es   = NL_MALLOC(sizeof(*m.es) * rows * cols);
-    NL_ASSERT(m.es != NULL);
+    m.es   = NF_MALLOC(sizeof(*m.es) * rows * cols);
+    NF_ASSERT(m.es != NULL);
     return m;
 }
 
-void nl_mat_rand(NL_Mat m, float low, float high)
+void nl_mat_rand(NF_Mat m, float low, float high)
 {
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {
@@ -80,7 +80,7 @@ void nl_mat_rand(NL_Mat m, float low, float high)
     }
 }
 
-void nl_mat_fill(NL_Mat m, float a)
+void nl_mat_fill(NF_Mat m, float a)
 {
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {
@@ -89,12 +89,12 @@ void nl_mat_fill(NL_Mat m, float a)
     }
 }
 
-void nl_mat_dot(NL_Mat dst, NL_Mat a, NL_Mat b)
+void nl_mat_dot(NF_Mat dst, NF_Mat a, NF_Mat b)
 {
     // validate rules of matrix multiplication
-    NL_ASSERT(a.cols == b.rows);
-    NL_ASSERT(dst.rows == a.rows);
-    NL_ASSERT(dst.cols == b.cols);
+    NF_ASSERT(a.cols == b.rows);
+    NF_ASSERT(dst.rows == a.rows);
+    NF_ASSERT(dst.cols == b.cols);
 
     for (size_t k = 0; k < b.rows; ++k) {
         for (size_t i = 0; i < dst.rows; ++i) {
@@ -105,11 +105,11 @@ void nl_mat_dot(NL_Mat dst, NL_Mat a, NL_Mat b)
     }
 }
 
-void nl_mat_sum(NL_Mat dst, NL_Mat a)
+void nl_mat_sum(NF_Mat dst, NF_Mat a)
 {
     // validate that matrices are of the same order
-    NL_ASSERT(dst.rows == a.rows);
-    NL_ASSERT(dst.cols == a.cols);
+    NF_ASSERT(dst.rows == a.rows);
+    NF_ASSERT(dst.cols == a.cols);
 
     for (size_t i = 0; i < dst.rows; ++i) {
         for (size_t j = 0; j < dst.rows; ++j) {
@@ -118,7 +118,7 @@ void nl_mat_sum(NL_Mat dst, NL_Mat a)
     }
 }
 
-void nl_mat_print(NL_Mat m)
+void nl_mat_print(NF_Mat m)
 {
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {
@@ -128,4 +128,4 @@ void nl_mat_print(NL_Mat m)
     }
 }
 
-#endif // NL_IMPLEMENTATION
+#endif // NF_IMPLEMENTATION

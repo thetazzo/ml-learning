@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include <time.h>
 
-#define NL_IMPLEMENTATION
-#include "nl.h"
+#define NF_IMPLEMENTATION
+#include "nf.h"
 
 int main(void)
 {
     srand(time(0));
 
-    NL_Mat a = nl_mat_alloc(1, 2);
+    NF_Mat a = nl_mat_alloc(1, 2);
     nl_mat_rand(a, 0, 1);
 
     float id_mat_data[] = {
@@ -17,13 +17,13 @@ int main(void)
         0, 1,
     };
 
-    NL_Mat b = {
+    NF_Mat b = {
         .rows = 2,
         .cols = 2,
         .es = id_mat_data,
     };
 
-    NL_Mat c = nl_mat_alloc(1, 2);
+    NF_Mat c = nl_mat_alloc(1, 2);
 
     printf("-------------------------\n");
     nl_mat_print(a);
