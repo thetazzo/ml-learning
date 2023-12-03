@@ -38,6 +38,7 @@ $$\begin{bmatrix} x_1 & x_2 \end{bmatrix} \cdot \begin{bmatrix} w_{11} & w_{12} 
     * Let's consider the output matrix as $C = A \times B$ which is going to be of order `a x c`
     * Then an element in matrix `C` is defined as:
     $$C_{ij} = A_{i1}B_{j1} + ... + A_{ib}B_{jc} = \sum_{k=1}^{b}a_{ik}b_{kj}$$
+    * for $i=1, ..., a$ and $j=1, ..., c$
 ---
 $$\begin{bmatrix} (x_1 \cdot w_{11} + x_2 \cdot w_{21}) & (x_1 \cdot w_{12} + x_2 \cdot w_{22}) \end{bmatrix} + \begin{bmatrix} b_1 & b_2 \end{bmatrix}$$
 
