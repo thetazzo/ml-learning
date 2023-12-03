@@ -66,3 +66,7 @@ $$\sigma \left(\begin{bmatrix} a_1 & a_2 \end{bmatrix} \cdot \begin{bmatrix} w_{
 * Form some of the definitions of how to compute layers of neural networks we could make an observation that the *input layer* could be named the **0th layer** or **layer 0** 
 * Furthermore we can deduce that **input values** $x_0$, $x_1$, ... $x_y$ are in fact `activations` of the **0th layer** $a_{01}$, $a_{02}$, ..., $a_{0y}$
 ---
+
+## XOR Implementation With NeuralFramework
+
+* Still in writing ...
