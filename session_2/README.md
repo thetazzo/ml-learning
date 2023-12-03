@@ -43,7 +43,7 @@ XOR:
 
 ---
 
-## Finite Difference As Gradient 
+## Finite Difference As "Gradient" 
 * Let's try a new approach to computing finite differences.
 * As we encounter more complex models, more data needs to be calculated.
 * We can introduce a `gradient model`.
