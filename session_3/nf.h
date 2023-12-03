@@ -32,14 +32,14 @@ typedef struct {
 /**
  * Allocate memory for a matrix
  */
-NF_Mat nl_mat_alloc(size_t rows, size_t cols);
+NF_Mat nf_mat_alloc(size_t rows, size_t cols);
 
-void nl_mat_rand(NF_Mat m, float low, float high);
-void nl_mat_fill(NF_Mat m, float a);
+void nf_mat_rand(NF_Mat m, float low, float high);
+void nf_mat_fill(NF_Mat m, float a);
 
-void nl_mat_dot(NF_Mat dst, NF_Mat a, NF_Mat b);
-void nl_mat_sum(NF_Mat dst, NF_Mat a);
-void nl_mat_print(NF_Mat m);
+void nf_mat_dot(NF_Mat dst, NF_Mat a, NF_Mat b);
+void nf_mat_sum(NF_Mat dst, NF_Mat a);
+void nf_mat_print(NF_Mat m);
 
 #endif // NF_H_
 
@@ -61,7 +61,7 @@ float rand_float(void)
  * -------------------------------------
  */
 
-NF_Mat nl_mat_alloc(size_t rows, size_t cols)
+NF_Mat nf_mat_alloc(size_t rows, size_t cols)
 {
     NF_Mat m = {0}; 
     m.rows = rows;
@@ -71,7 +71,7 @@ NF_Mat nl_mat_alloc(size_t rows, size_t cols)
     return m;
 }
 
-void nl_mat_rand(NF_Mat m, float low, float high)
+void nf_mat_rand(NF_Mat m, float low, float high)
 {
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {
@@ -80,7 +80,7 @@ void nl_mat_rand(NF_Mat m, float low, float high)
     }
 }
 
-void nl_mat_fill(NF_Mat m, float a)
+void nf_mat_fill(NF_Mat m, float a)
 {
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {
@@ -89,7 +89,7 @@ void nl_mat_fill(NF_Mat m, float a)
     }
 }
 
-void nl_mat_dot(NF_Mat dst, NF_Mat a, NF_Mat b)
+void nf_mat_dot(NF_Mat dst, NF_Mat a, NF_Mat b)
 {
     // validate rules of matrix multiplication
     NF_ASSERT(a.cols == b.rows);
@@ -105,7 +105,7 @@ void nl_mat_dot(NF_Mat dst, NF_Mat a, NF_Mat b)
     }
 }
 
-void nl_mat_sum(NF_Mat dst, NF_Mat a)
+void nf_mat_sum(NF_Mat dst, NF_Mat a)
 {
     // validate that matrices are of the same order
     NF_ASSERT(dst.rows == a.rows);
@@ -118,7 +118,7 @@ void nl_mat_sum(NF_Mat dst, NF_Mat a)
     }
 }
 
-void nl_mat_print(NF_Mat m)
+void nf_mat_print(NF_Mat m)
 {
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {

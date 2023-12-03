@@ -9,8 +9,8 @@ int main(void)
 {
     srand(time(0));
 
-    NF_Mat a = nl_mat_alloc(1, 2);
-    nl_mat_rand(a, 0, 1);
+    NF_Mat a = nf_mat_alloc(1, 2);
+    nf_mat_rand(a, 0, 1);
 
     float id_mat_data[] = {
         1, 0,
@@ -23,15 +23,15 @@ int main(void)
         .es = id_mat_data,
     };
 
-    NF_Mat c = nl_mat_alloc(1, 2);
+    NF_Mat c = nf_mat_alloc(1, 2);
 
     printf("-------------------------\n");
-    nl_mat_print(a);
+    nf_mat_print(a);
     printf("-------------------------\n");
-    nl_mat_print(b);
+    nf_mat_print(b);
     printf("-------------------------\n");
-    nl_mat_dot(c, a, b);
-    nl_mat_print(c);
+    nf_mat_dot(c, a, b);
+    nf_mat_print(c);
 
     return 0;
 }
