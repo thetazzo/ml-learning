@@ -39,7 +39,7 @@ $$\begin{bmatrix} x_1 & x_2 \end{bmatrix} \cdot \begin{bmatrix} w_{11} & w_{12} 
     $$c_{ij} = \sum_{k=1}^{n}a_{ik}b_{kj}$$
     * were n is the abmount of columns in the second matrix
     * where $c_{ij}$ is the output entry of the product of the i-th row of the first matrix and j-th column of the second matrix
-    ---
+---
 $$\begin{bmatrix} (x_1 \cdot w_{11} + x_2 \cdot w_{21}) & (x_1 \cdot w_{12} + x_2 \cdot w_{22}) \end{bmatrix} + \begin{bmatrix} b_1 & b_2 \end{bmatrix}$$
 2. The second step is to perform matrix addition between the resulting matrix form the first step and the `biases matrix` ~ `B`
     * Here we must ensure that both matrices are of the same *order* this means that both matices have the same amount of rows and columns
