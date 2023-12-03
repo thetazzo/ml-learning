@@ -34,11 +34,10 @@ $$\sigma \left(\begin{bmatrix} x_1 & x_2 \end{bmatrix} \cdot \begin{bmatrix} w_{
 $$\begin{bmatrix} x_1 & x_2 \end{bmatrix} \cdot \begin{bmatrix} w_{11} & w_{12} \\\ w_{21} & w_{22} \end{bmatrix}$$
 1. The first step is to compute matrix multiplication between the `activations matrix` ~ `A` and `weights matrix` ~ `W`
     * For the multiplication between matrices to be possible we must ensure that the amount of colums in the first matrix is equal to the amout of rows of the second matrix
-    * The resulting matrix will have as many rows as the first matrix and the amount of colums as the second matrix
-    * Each value in each row of the first matrix we multiply with each value in each column in the second matrix and then we sum them up
-    $$c_{ij} = \sum_{k=1}^{n}a_{ik}b_{kj}$$
-    * were n is the abmount of columns in the second matrix
-    * where $c_{ij}$ is the output entry of the product of the i-th row of the first matrix and j-th column of the second matrix
+    * Let's consider matrix `A` which is or order `a x b` and matrix `B` which is of order `b x c`
+    * Let's consider matrix `C = AB` which is of order `a x c`
+    * Then an element in matrix `C` is defined as:
+    $$C_{ij} = A_{i1}B_{j1} + ... + A_{ib}B_{jc} = \sum_{k=1}^{b}a_{ik}b_{kj}$$
 ---
 $$\begin{bmatrix} (x_1 \cdot w_{11} + x_2 \cdot w_{21}) & (x_1 \cdot w_{12} + x_2 \cdot w_{22}) \end{bmatrix} + \begin{bmatrix} b_1 & b_2 \end{bmatrix}$$
 
