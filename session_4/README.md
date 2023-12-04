@@ -37,6 +37,18 @@
 
 ---
 
-### Gradient Descent ~ The Better Way
+## Gradient Descent ~ The Better Way
 
 [Gradient Descent](./grad.pdf)
+
+* We calculated the actual correct derivative for our `cost function` represented in the document as $C'$
+
+### The Advantaget
+```
+"You have done nothing new!
+```
+* The core idea remains the same:
+    * *Optimize the cost function by looking at the growth of the function and moving the opposite direction towards the `minimum`*
+
+* **The major difference**:
+    * Before we have chosen an arbitrary value $\varepsilon$ by which we modified the `cost function` and we encountered issues when dealing with *sensitivity* of the parameters of our model

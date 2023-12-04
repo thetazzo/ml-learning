@@ -11,4 +11,7 @@ set -xe
 
 ## Session 3
 # clang -Wall -Wextra -o main ./session_3/main.c -lm
-clang -Wall -Wextra -o xor ./session_3/xor.c -lm
+# clang -Wall -Wextra -o xor ./session_3/xor.c -lm
+
+## Session 4
+clang -Wall -Wextra -o twice ./session_4/twice.c -lm

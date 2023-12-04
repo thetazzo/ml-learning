@@ -40,7 +40,7 @@ $$f(x) = x * w$$
 
 ## Cost function ~ Artificial neuron with one connection 
 * This function will measure the correctness of our model.
-* The function will use our training data and the parameter `w` and parameter `b` to calculate the `trainError` value which will tell us how far off our model is in relation to the training data (how incorrect our current model is in relation to our training data).
+* The function will use our training data and the parameter `w` and parameter `b` to calculate the `cost` of our model which will tell us how far off our model is in relation to the training data (how incorrect our current model is in relation to our training data).
     * The `w` parameter represents the weight of our connection. 
     * The `b` parameter represents the bias.
 
@@ -50,24 +50,24 @@ $$f(x) = x * w$$
 
     $$y = x*w + b$$
 
-* Let's calculate the distance between the desired output of the training data `tdy` and the calculated output `y`.
+* Let's calculate the differance between the desired output of the training data `tdy` and the calculated output `y`.
     
-    $$distance = y - tdy$$
+    $$differance = y - tdy$$
 
-* Let's accumulate the squares of `distance` in `trainError`
+* Let's accumulate the squares of `difference` in `cost`
     
-    $$trainError = trainError + (distance*distance)$$
+    $$cost = cost + (difference*difference)$$
 
-* Using squared distances we get
-    * **absolute values** ~ we square the distance so that we don't have to deal with negative numbers. 
-    * Amplified errors** ~ we square the distance so that any large offset from the desired output is amplified.  
+* Using squared differences we get
+    * **absolute values** ~ we square the differance so that we don't have to deal with negative numbers. 
+    * Amplified errors** ~ we square the differance so that any large offset from the desired output is amplified.  
     
-* After we've traversed all the training data and accumulated the `trainError`, we want to normalise the error (find it's average), so we divide it by the amount of training data.
-    $$trainError = \frac{trainError}{trainCount}$$
+* After we've traversed all the training data and accumulated the `cost`, we want to normalise the error (find it's average), so we divide it by the amount of training data.
+    $$cost = \frac{cost}{trainCount}$$
 
-* The `trainError` is a measure of how badly our model is performing.
-    * The larger the `trainError`, the worse the model's performance.
-    * The smaller the `trainError`, the better the model performs.
+* The `cost` is a measure of how badly our model is performing.
+    * The larger the `cost`, the worse the model's performance.
+    * The smaller the `cost`, the better the model performs.
 
 ---
 
@@ -115,13 +115,13 @@ $$f(x) = x * w$$
     
     where `|...|` define an absolute value
 
-* In other words, we take the distance between the result of the function `f` shifted by the parameter `h` and the result of the function `f` not shifted, and we divide this distance by the same value `h`.
+* In other words, we take the differance between the result of the function `f` shifted by the parameter `h` and the result of the function `f` not shifted, and we divide this differance by the same value `h`.
 * We do this by setting the parameter `h` to 0.
       
 * From the definition of `finite difference` we know that
 $$\Delta_h[f](x)=f(x - h) - f(x)$$
 
-* Let's combine both ideas to calculate the error distance of our cost (`dw`) and the error distance of our bias (`db`).
+* Let's combine both ideas to calculate the error differance of our cost (`dw`) and the error differance of our bias (`db`).
     $$dw=\frac{cost(w + eps, b) - cost(w, b)}{eps}$$
     $$db=\frac{cost( w, b + eps) - cost(w, b)}{eps}$$
 
@@ -129,11 +129,11 @@ $$\Delta_h[f](x)=f(x - h) - f(x)$$
     $$w = w - dw$$
     $$b = b - db$$
 
-* The first problem we encounter when calculating error distance values is that the values appear to be large numbers, causing our parameters `w`, `b` to "jump around" too much and never reach the desired values.
+* The first problem we encounter when calculating error differance values is that the values appear to be large numbers, causing our parameters `w`, `b` to "jump around" too much and never reach the desired values.
 
 * Let's introduce the concept of `learning rate (rate)` into our model.
     * We can now have more control over the learning rate of our model.
-    * In our case it will solve the problem of large error distance values 
+    * In our case it will solve the problem of large error differance values 
     $$w = w - (rate * dw)$$
     $$b = b - (rate * db)$$
 
@@ -194,7 +194,7 @@ $$f(x) = x1 * w1 + x2*w2$$
 ## Cost function ~ Artificial Neuron With Two Connections 
 
 * This function will mesure the correctness of our model
-* The function will use our training data and parameter `w1`, `w2` and parameter `b` to calucalte `trainError` value with will tell us how far off our model is in regards to the training data (how incorrect our current model in comparison to our training data)
+* The function will use our training data and parameter `w1`, `w2` and parameter `b` to calucalte `cost` value with will tell us how far off our model is in regards to the training data (how incorrect our current model in comparison to our training data)
     * `w1` parameter represents the weight of our first connection 
     * `w2` parameter represents the weight of our second connection 
     * `b ` parameter represents the bias
@@ -205,23 +205,23 @@ $$f(x) = x1 * w1 + x2*w2$$
 
     $$y = sigmoid(x1*w1 + x2*w2 + b)$$
 
-* Let's calcuate the distance between the desired output of the training data `tdy` and the calcualated output `y`
+* Let's calcuate the differance between the desired output of the training data `tdy` and the calcualated output `y`
 
-    $$distance = y - tdy$$
+    $$differance = y - tdy$$
 
-* Let's accumulate the squres of `distance` into `trainError`
+* Let's accumulate the squres of `differance` into `cost`
 
-    $$trainError = trainError + (distance*distance)$$
+    $$cost = cost + (differance*differance)$$
 
-* Using squared distances we achieve:
-    * **absolute values** ~ we squre the distance is so that we don't have to deal with negative numbers 
-    * **aplified errors** ~ we square the distance is so that any large offset from the desired output is amplified  
+* Using squared differencess we achieve:
+    * **absolute values** ~ we squre the differance is so that we don't have to deal with negative numbers 
+    * **aplified errors** ~ we square the differance is so that any large offset from the desired output is amplified  
     
-* After we traverse all of the traning data and have accumulated the `trainError` we want to normalize the error (find it's average) so we devide it by the amount of training data
-    $$trainError = \frac{trainError}{trainCount}$$
+* After we traverse all of the traning data and have accumulated the `cost` we want to normalize the error (find it's average) so we devide it by the amount of training data
+    $$cost = \frac{cost}{trainCount}$$
 
-* `trainError` is a messure of how badly our model performs
-    * the larger the `trainError` the worse the model performs
-    * the smaller the `trainError` the better the model performs
+* `cost` is a messure of how badly our model performs
+    * the larger the `cost` the worse the model performs
+    * the smaller the `cost` the better the model performs
 
 
