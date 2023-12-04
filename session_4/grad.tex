@@ -1,0 +1,30 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+
+\begin{document}
+\section{Gradient Descent}
+
+\begin{align}
+dC(\omega) = \lim_{\varepsilon\to 0}\frac{C(\omega + \varepsilon) - C(\omega)}{\varepsilon} \\
+\end{align}
+
+\subsection{``Computing The Derivitive of Twice``}
+
+\begin{align}
+    C(w)  &= \frac{\sum_{i=1}^{n}(x_i \cdot w - y_i)^2}{n} \\
+    C'(w) &= \left(\frac{\sum_{i=1}^{n}(x_i \cdot w - y_i)^2}{n}\right)' = \\
+          &= \left(\frac{1}{n} \cdot \sum_{i=1}^{n}(x_i \cdot w - y_i)^2 \right)' = \\ 
+          &= \frac{1}{n} \cdot \left(\sum_{i=1}^{n}(x_i \cdot w - y_i)^2 \right)' = \\ 
+          &= \frac{1}{n} \cdot \sum_{i=1}^{n}\left( (x_i \cdot w - y_i)^2 \right)' = \\ 
+          &= \frac{1}{n} \cdot \sum_{i=1}^{n}\left( 2 \cdot (x_i \cdot w - y_i) (x_i \cdot w - y_i)' \right) = \\ 
+          &= \frac{1}{n} \cdot \sum_{i=1}^{n}\left( 2 \cdot (x_i \cdot w - y_i) \cdot x_i \right) 
+\end{align}
+
+
+\begin{align}
+    C(w)  &= \frac{\sum_{i=1}^{n}(x_i \cdot w - y_i)^2}{n} \\
+    C'(w) &= \frac{1}{n} \cdot \sum_{i=1}^{n} \left( 2 \cdot (x_i \cdot w - y_i) \cdot x_i \right) = \\ 
+\end{align}
+
+\end{document}

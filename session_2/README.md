@@ -27,7 +27,7 @@ XOR:
     ```
     * Neural networks with only one neuron cannot usually solve problems that are not linearly separable.
 
-* We can describe XOR with OR, AND, NAND
+* XOR can be described using OR, AND, NAND gates
     ```
     XOR = (x|y) & ~(x&y)
     ```
@@ -46,11 +46,11 @@ XOR:
 ## Finite Difference As "Gradient" 
 * Let's try a new approach to computing finite differences.
 * As we encounter more complex models, more data needs to be calculated.
-* We can introduce a `gradient model`.
-* This is a model that has the same structure as the input model, but inside it we will store the differences ~ the gradient.
-* The `gradient model` here represents all the values we need to subtract from the original model to drive the function towards the `minimum`.
+* Let's introduce a `gradient model`.
+* This is a model that has the same structure as the input model, but inside it will store the differences ~ the gradient.
+* The `gradient model` here represents all the values that need to subtracted from the original model to drive the function towards the `minimum`.
 
 ### How will it learn?
-* Before each iteration of the training process, we create a `gradient model`.
+* Before each iteration of the training process, let's create a `gradient model`.
 * The training process consists of taking our `neural network model` and applying the 'gradient model' to it.
 * In this scenario, applying means **subtracting all values of the gradient model (multiplied by the learning rate) from the neural network model**.

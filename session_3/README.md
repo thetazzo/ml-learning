@@ -115,21 +115,21 @@ $$\sigma \left(\begin{bmatrix} a_1 & a_2 \end{bmatrix} \cdot \begin{bmatrix} w_{
 ### Computing Finite Difference Using Matrices ~ Gradient Neural Network
 
 * We are still using the same principle method of `finite difference` to optimize (decrease) our `cost function`  
-    * Out `cost function` still takes the the output of our current neural network and calculates the distance (*error*) from expected output in our *training data*
+    * Out `cost function` still takes the the output of our current neural network and calculates the difference (*error*) from expected output in our *training data*
 * Our model stores all **weights** and **biases** as array data 
-* Let's traverse all layers of our neural network and build a new new neural network (`gradient neural network`) that will store the distances (*errors*) of our neural network 
-    * To recap how we calcualte the distance (*error*) for a single value:
-        1. We compute the cost of the neural network ~ `originalCost`
+* Let's traverse all layers of our neural network and build a new new neural network (`gradient neural network`) that will store the difference (*errors*) of our neural network 
+    * To recap how to calcualte the difference (*error*) for a single value:
+        1. Compute the cost of the neural network ~ `originalCost`
         2. Take the value (ex. weight of bias) and tweak it by adding to it a value $\varepsilon$
         3. compute the `newCost` cost of the neural network and from it substract the `originalCost` cost of the neural network then devide the result by the same value $\varepsilon$
         $$\frac{(newCost - originalCost)}{\varepsilon}$$
-    * The resulting `gradient neural network` will store distances (*erros*) corresponding to all *weights* and *biases* of the neural network
+    * The resulting `gradient neural network` will store differences (*erros*) corresponding to all *weights* and *biases* of the neural network
 
 ---
 
 ### Applying The Gradient Network 
 * After calculating the gradient network applying it to the neural network is quite straight forward
-* Again let's treverse all the layers of our neural network and from each *weight* and *bias* of our neural network let's substract the corresponding distance (*error*) in the provided `gradient network` multiplied by the provided `learning rate`
+* Again let's treverse all the layers of our neural network and from each *weight* and *bias* of our neural network let's substract the corresponding difference (*error*) in the provided `gradient network` multiplied by the provided `learning rate`
     $$W_{ij} = W_{ij} - (learningRate \ \cdot W^g_{ij})$$
     * $W_{ij}$ is a value in the *weights* matrix of the neural network at i-th row and j-th column
     <br></br>
