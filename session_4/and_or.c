@@ -119,7 +119,7 @@ int main()
     printf("epoch: %zu => computation time: %f sec \n", epoch, t);
     printf("--------------------------------\n");
 
-    printf("w1: %f, w2: %f, b: %f\n", w1, w2, b);
+    printf("cost: %f, w1: %f, w2: %f, b: %f\n", cost(w1, w2, b), w1, w2, b);
 
     for (size_t i = 0; i <= 1; ++i) {
         for (size_t j = 0; j <= 1; ++j) {
