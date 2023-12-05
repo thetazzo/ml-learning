@@ -1,6 +1,6 @@
 \documentclass{article}
 
-\usepackage{amsmath}
+\usepackage{mathtools}
 \usepackage{tikz}
 
 \begin{document}
@@ -130,13 +130,15 @@ For this we will use PARTIAL DERIVITIVES this means that first we compute a deri
         \end{align}
     }
 \end{enumerate}
-To summarize the parial derivitives are:
+To summarize the partial derivitives are:
 \begin{align}
     a_i  &= \sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) \\ 
-\pd[w_1]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot x_i \\ 
-\pd[w_2]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot y_i \\ 
-\pd[b]C   &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \\ 
+    \tikzmark{A} a \tikzmark{B}
+    \pd[w_1]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot x_i \\ 
+    \pd[w_2]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot y_i \\ 
+    \pd[b]C   &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \\ 
 \end{align}
 
+\tikz[remember picture, overlay]\draw(A.south west)ractangle(B.north west)
 
 \end{document}
