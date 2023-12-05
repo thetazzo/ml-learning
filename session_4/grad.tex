@@ -3,6 +3,11 @@
 \usepackage{mathtools}
 \usepackage{tikz}
 
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} % Font Family
+
+\renewcommand{\rmdefault}{lmss}
+
 \begin{document}
 \section{Gradient Descent}
 
@@ -56,13 +61,13 @@ One neuron model is defined as:
 \begin{center}
 \def\d{2}
 \begin{tikzpicture}
-    \node (X_1) at (-\d,0.75) {$x$}; 
-    \node (X_2) at (-\d,-0.75) {$y$}; 
-    \node[shape=circle,draw=black] (N) at (0,0) {$\sigma, b$}; 
-    \node (Y) at (\d,0) {$z$}; 
-    \path[->] (X_1) edge node[above] {$w_1$} (N);
-    \path[->] (X_2) edge node[above] {$w_2$} (N);
-    \path[->] (N) edge (Y);
+    \node (x_1) at (-\d,0.75) {$x$}; 
+    \node (x_2) at (-\d,-0.75) {$y$}; 
+    \node[shape=circle,draw=black] (n) at (0,0) {$\sigma, b^{(1)}$}; 
+    \node (y) at (\d,0) {$z$}; 
+    \path[->] (x_1) edge node[above] {$w_1$} (n);
+    \path[->] (x_2) edge node[above] {$w_2$} (n);
+    \path[->] (n) edge (y);
 \end{tikzpicture}
 \end{center}
 \subsubsection{Cost}
@@ -74,7 +79,7 @@ Let's recall the Sigmoid activation function
 Let's define the cost function $C$ for our model
 \begin{align}
     a_i  &= \sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) \\ 
-    C(x) &= \avgsum[i, n](a_i - y_i)^2 
+    \Aboxed{C(x) &= \avgsum[i, n](a_i - z_i)^2}
 \end{align}
 Let's compute the derivitive $C'$ for our function\\
 \\
@@ -138,7 +143,7 @@ To summarize the partial derivitives are:
     \pd[b]C   &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \\ 
 \end{align}
 \newpage
-\subsection{Execution Time Comparison}
+\subsubsection{Execution Time Comparison}
 Let's compare computation time differance between \textbf{Finite Difference} and \textbf{Gradient Descent}\\
 My machine is Lenovo Legion Slim 5:
 \begin{itemize}
@@ -155,5 +160,108 @@ The test:
 \indent \[ \textbf{Finite Difference}:\ \approx 1.556\ seconds \]
 \indent \[ \textbf{Gradient Descent}:\ \approx 0.473\ seconds \]
 Let's not forget that NAND gate simulation is preatty much trivial and both methods of computation would have approximatly the same time when not doing as much iterations(epochs) of training \\
+\newpage
+\def\arg[#1, #2]{#1^{(#2)}}
+\subsection{Two Neuron Model And 1 Input}
+\begin{center}
+\def\d{2}
+\begin{tikzpicture}
+    \node (x_1) at (-\d, 0) {$a^{(0)}$}; 
+    \node[shape=circle,draw=black] (n1) at (0,0) {$\sigma,  b^{(1)}$}; 
+    \node[shape=circle,draw=black] (n2) at (\d,0) {$\sigma, \arg[b, 2]$}; 
+    \node (y) at ({2*\d},0) {$z$}; 
+    \path[->] (x_1) edge node[above] {$w^{(1)}$} (n1);
+    \path[->] (n1) edge node[above] {$\arg[w, 2]$} (n2);
+    \path[->] (n2) edge (y);
+\end{tikzpicture}
+\end{center}
+Let's define the mathematical model
+\begin{align}
+    a^{(1)} &= \sigma(x \cdot w^{(1)} + b^{(1)})\\
+    a^{(2)} &= \sigma(a^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+    \\
+    \text{$a^{(i)}$}  \: &\text{...} \: \text{activation of the i-th layer}\\
+    \\
+    z &= a^{(2)}\\
+    z &= \sigma(a^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+\end{align}
+\subsection{Cost}
+Let's define the cost function $C^{(2)}$ for the second layer of our model:
+\begin{align}
+    a_i^{(1)} &= \sigma(x_i \cdot w^{(1)} + b^{(1)})\\
+    a_i^{(2)} &= \sigma(a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+    \\
+    \text{$a_i^{(l)}$}  \: &\text{...} \: \text{activation of the i-th sample of the l-th layer}
+    \\
+    \\
+    \Aboxed{C^{(2)}(x) &= \avgsum[i, n](a_i^{(2)} - z_i)^2} 
+\end{align}
+Before we start computing derivitives let's think about them \\
+\begin{itemize}
+    \item {Firstly we have to compute partial derivitives for $\arg[w, 2]$ nad $\arg[b, 2]$ which should not be hard becuase we already converd similar calculations in the past}
+    \item {When we try to compute partial derivitives inner $\arg[w, 1]$ and $\arg[b, 1]$ we notice that the parameters $\arg[w, 1]$ and $\arg[b, 1]$ are deeply nested inside $\arg[a, 1]$ which can present a challange when trying to compute partial derivates}
+    \item {Introduce a separate cost functions for each indivudual layer\\
+                                                        - Alexey Kutepov}
+    \item {For each of these \textit{specialized} layers you compute the cost only for the variables that are nearly accessable}
+    \item {Let's treat the \textit{previous activation} as a variable of the cost function and let's differentiate it}
+    \item {The result of the differentiation of the cost function is actually an \textit{differance(error)} that we can use for the computation of the \textit{Difference(error)} of the inner layer}
+    \item {We continue to compute these \textit{differances(errors} for all layers all the way back to the \textit{input layer} => This is where the idea of \textbf{backpropagation} comes to play}
+\end{itemize}
+Let's compute the derivitive $C^{(2)}$$'$ of our function\\
+\\
+\indent Partial derivitive in regards to $\arg[w, 2]$
+\begin{align}
+    a_i^{(2)} &= \sigma(a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+    \pd[{\arg[w, 2]}]a_i^{(2)} 
+        &= \pd[{\arg[w, 2]}]\sigma(a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+        &= a_i^{(1)}(1 - a_i^{(1)}) \cdot \pd[{\arg[w, 2]}](a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+    \pd[{\arg[w, 2]}]a_i^{(2)} &= a_i^{(1)}(1 - a_i^{(1)}) \cdot a_i^{(1)}\\
+    \\
+    \\
+    \pd[{\arg[w, 2]}]C^{(2)} 
+                &=  \pd[{\arg[w, 2]}]\left(\avgsum[i, n](a_i^{(2)} - z_i)^2\right)    \\
+                &=  \avgsum[i, n]\pd[{\arg[w, 2]}](a_i^{(2)} - z_i)^2)    \\
+                &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot \pd[{\arg[w, 2]}](a_i^{(2)} - z_i)    \\
+                &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot \pd[{\arg[w, 2]}]a_i^{(2)}    \\
+    \pd[{\arg[w, 2]}]C^{(2)}  &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot a_i^{(1)}(1 - a_i^{(1)}) \cdot a_i^{(1)}    \\
+\end{align}
+\indent Partial derivitive in regards to $\arg[b, 2]$
+\begin{align}
+    a_i^{(2)} &= \sigma(a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+    \pd[{\arg[b, 2]}]a_i^{(2)} 
+        &= \pd[{\arg[b, 2]}]\sigma(a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+        &= a_i^{(1)}(1 - a_i^{(1)}) \cdot \pd[{\arg[b, 2]}](a_i^{(1)} \cdot \arg[w, 2] + {\arg[b, 2]})\\
+    \pd[{\arg[b, 2]}]a_i^{(2)}   &= a_i^{(1)}(1 - a_i^{(1)}) \\
+    \\
+    \\
+    \pd[{\arg[b, 2]}]C^{(2)}
+                &=  \pd[{\arg[b, 2]}]\left(\avgsum[i, n](a_i^{(2)} - z_i)^2\right)    \\
+                &=  \avgsum[i, n]\pd[{\arg[b, 2]}](a_i^{(2)} - z_i)^2)    \\
+                &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot \pd[{\arg[b, 2]}](a_i^{(2)} - z_i)    \\
+                &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot \pd[{\arg[b, 2]}]a_i^{(2)}    \\
+    \pd[{\arg[b, 2]}]C^{(2)} &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot a_i^{(1)}(1 - a_i^{(1)})    \\
+\end{align}
+\indent Partial derivitive in regards to $\arg[a_i, 1]$
+\begin{align}
+    a_i^{(2)} &= \sigma(a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+    \pd[{\arg[a_i, 1]}]a_i^{(2)} 
+        &= \pd[{\arg[a_i, 1]}]\sigma(a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+        &= a_i^{(1)}(1 - a_i^{(1)}) \cdot \pd[{\arg[a_i, 1]}](a_i^{(1)} \cdot \arg[w, 2] + {\arg[b, 2]})\\
+    \pd[{\arg[a_i, 1]}]a_i^{(2)} &= a_i^{(1)}(1 - a_i^{(1)}) \cdot \arg[w, 2]\\
+    \\
+    \\
+    \pd[{\arg[a_i, 1]}]C^{(2)}
+                &=  \pd[{\arg[a_i, 1]}]\left(\avgsum[i, n](a_i^{(2)} - z_i)^2\right)    \\
+                &=  \avgsum[i, n]\pd[{\arg[a_i, 1]}](a_i^{(2)} - z_i)^2)    \\
+                &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot \pd[{\arg[a_i, 1]}](a_i^{(2)} - z_i)    \\
+                &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot \pd[{\arg[a_i, 1]}]a_i^{(2)}    \\
+    \pd[{\arg[a_i, 1]}]C^{(2)} &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot a_i^{(1)}(1 - a_i^{(1)}) \cdot \arg[w, 2]    \\
+\end{align}
+Let's define the cost function of the first layer $\arg[C, 1]$ as:
+\begin{align}
+    \pd[{\arg[a_i, 1]}]C^{(2)} &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot a_i^{(1)}(1 - a_i^{(1)}) \cdot \arg[w, 2]    \\
+    e_i  &= \arg[a_i, i] - (\arg[a_i, i] - \pd[{\arg[a_i, 1]}]C^{(2)})\\
+    \arg[C, 1] &= \avgsum[i, n] (\arg[a_i, 1] - e_i) \\
+\end{align}
+Let's compute the derivitive $C^{(1)}$$'$ of our function\\
 \end{document}
-
