@@ -39,6 +39,7 @@
 
 ## Gradient Descent ~ The Better Way
 
+* Slowly transitioning to using only LaTeX:
 [Gradient Descent](./grad.pdf)
 
 ### introduction With One Variable
