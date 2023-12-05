@@ -41,14 +41,30 @@
 
 [Gradient Descent](./grad.pdf)
 
-* We calculated the actual correct derivative for our `cost function` represented in the document as $C'$
+### introduction With One Variable
+* We calculated the actual correct derivative for our `cost function` with one parameter represented in the document as $C'$
 
-### The Advantaget
-```
-"You have done nothing new!
-```
+### The Advantage
 * The core idea remains the same:
     * *Optimize the cost function by looking at the growth of the function and moving the opposite direction towards the `minimum`*
 
 * **The major difference**:
     * Before we have chosen an arbitrary value $\varepsilon$ by which we modified the `cost function` and we encountered issues when dealing with *sensitivity* of the parameters of our model
+
+* Faster on the computation level
+    * Using `finite difference` method on the level of computation is slower because you have to compute the cost twice
+        * First you compute the *original cost* then you modify the neural network and you compute the *new cost* which you subtract from the original cost to find the differance 
+    * On the other hand using `gradient descent` you compute the cost **only once**
+        * You compute the derivative of the cost function
+
+* **The Advantage**: Faster and more accurate perforamce
+
+### What Is A Gradient?
+* **Gradient** is in essence a **derivative** for a **multivariable function**
+
+* In contrast to returning a single number it produces a *vector* which shows the growth of a function 
+* Since our model can have many parameters the *gradient* is going to be a *vector* with as many values as there are paramenter in the model
+    * In other words ***Gradient is a vector of derivatives for each input parameter***
+* As before you substract the calculated gradient from your model
+    * Substract the vector of derivatives from the vector of parameters
+

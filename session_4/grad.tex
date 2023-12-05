@@ -1,6 +1,7 @@
 \documentclass{article}
 
 \usepackage{amsmath}
+\usepackage{tikz}
 
 \begin{document}
 \section{Gradient Descent}
@@ -9,22 +10,133 @@
 dC(\omega) = \lim_{\varepsilon\to 0}\frac{C(\omega + \varepsilon) - C(\omega)}{\varepsilon} \\
 \end{align}
 
-\subsection{``Computing The Derivitive of Twice``}
+\subsection{Derivitive Of One Parameter Function}
+Within the \textit{Twice} example we described a model with one parameter - w 
+
+\def\avgsum[#1, #2]{\frac{1}{#2}\sum_{#1=1}^{#2}}
+\begin{align}
+    \intertext{The formula had a form like this:}
+    f(x) = x \cdot w
+\end{align}
+\begin{align}
+    \intertext{Function $C$ which takes one parameter $w$ is defined as:}
+    C(w)  = \avgsum[i, n](x_i \cdot w - y_i)^2 
+\end{align}
 
 \begin{align}
-    C(w)  &= \frac{\sum_{i=1}^{n}(x_i \cdot w - y_i)^2}{n} \\
-    C'(w) &= \left(\frac{\sum_{i=1}^{n}(x_i \cdot w - y_i)^2}{n}\right)' = \\
-          &= \left(\frac{1}{n} \cdot \sum_{i=1}^{n}(x_i \cdot w - y_i)^2 \right)' = \\ 
-          &= \frac{1}{n} \cdot \left(\sum_{i=1}^{n}(x_i \cdot w - y_i)^2 \right)' = \\ 
-          &= \frac{1}{n} \cdot \sum_{i=1}^{n}\left( (x_i \cdot w - y_i)^2 \right)' = \\ 
-          &= \frac{1}{n} \cdot \sum_{i=1}^{n}\left( 2 \cdot (x_i \cdot w - y_i) (x_i \cdot w - y_i)' \right) = \\ 
-          &= \frac{1}{n} \cdot \sum_{i=1}^{n}\left( 2 \cdot (x_i \cdot w - y_i) \cdot x_i \right) 
+    \intertext{Let's compute the derivitive $C'$ of our function:} 
+    C'(w) &= \left(C\right)' \\
+          &= \left(\avgsum[i, n](x_i \cdot w - y_i)^2\right)' = \\
+          &= \left(\avgsum[i, n](x_i \cdot w - y_i)^2 \right)' = \\ 
+          &= \frac{1}{n} \left(\sum_{i=1}^{n}(x_i \cdot w - y_i)^2 \right)' = \\ 
+          &= \avgsum[i, n] \left( (x_i \cdot w - y_i)^2 \right)' = \\ 
+          &= \avgsum[i, n] \left( 2 \cdot (x_i \cdot w - y_i) (x_i \cdot w - y_i)' \right) = \\ 
+          &= \avgsum[i, n] \left( 2 \cdot (x_i \cdot w - y_i) \cdot x_i \right) 
 \end{align}
 
 
 \begin{align}
-    C(w)  &= \frac{\sum_{i=1}^{n}(x_i \cdot w - y_i)^2}{n} \\
-    C'(w) &= \frac{1}{n} \cdot \sum_{i=1}^{n} \left( 2 \cdot (x_i \cdot w - y_i) \cdot x_i \right) = \\ 
+    \intertext{The final form of our derivitive:}
+    C'(w) &= \avgsum[i, n] \left( 2 \cdot (x_i \cdot w - y_i) \cdot x_i \right) 
 \end{align}
+
+\subsection{One Neuron Model With 2 Inputs}
+One neuron model is defined as:  
+\begin{align}
+    z  = \sigma(x \cdot w_1 + y \cdot w_2 + b) 
+\end{align}
+\begin{align*}
+    \text{$x_1$}  \: &\text{...} \: \text{input parameter}\\
+    \text{$x_2$}  \: &\text{...} \: \text{input parameter}\\
+    \text{$w_1$}  \: &\text{...} \: \text{weight paramter}\\
+    \text{$w_2$}  \: &\text{...} \: \text{weight paramter}\\
+    \text{b}  \: &\text{...} \: \text{bias parameter}\\
+    \sigma    \: &\text{...} \: \text{sigmoid activation function}
+\end{align*}
+\begin{center}
+\def\d{2}
+\begin{tikzpicture}
+    \node (X_1) at (-\d,0.75) {$x$}; 
+    \node (X_2) at (-\d,-0.75) {$y$}; 
+    \node[shape=circle,draw=black] (N) at (0,0) {$\sigma, b$}; 
+    \node (Y) at (\d,0) {$z$}; 
+    \path[->] (X_1) edge node[above] {$w_1$} (N);
+    \path[->] (X_2) edge node[above] {$w_2$} (N);
+    \path[->] (N) edge (Y);
+\end{tikzpicture}
+\end{center}
+\subsubsection{Cost}
+Let's recall the Sigmoid activation function  
+\begin{align}
+    \sigma(x)  &= \frac{1}{1 + e^{-x}} \\ 
+    \sigma(x)' &= \sigma(x) \cdot (1 - \sigma(x)) 
+\end{align}
+Let's define the cost function $C$ for our model
+\begin{align}
+    a_i  &= \sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) \\ 
+    C(x) &= \avgsum[i, n](a_i - y_i)^2 
+\end{align}
+Let's compute the derivitive $C'$ for our function\\
+\\
+We have to modify TWO parameters $w, b$\\
+\\
+For this we will use PARTIAL DERIVITIVES this means that first we compute a derivitive in respect to $w_1$, $w_2$ and then we compute another derivitive in respect to $b$ \\
+\def\pd[#1]{\partial_{#1}}
+\begin{enumerate}
+    \item{
+        Partial Derivitive in respect to $w_1$
+        \begin{align}
+            a_i  &= \sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) = \\ 
+            \pd[w_1]a_i  &= \pd[w_1](\sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) = \\ 
+                         &= a_i(1 - a_i) \pd[w_1](x_i \cdot w_1 + y_i \cdot w_2 +b) = \\ 
+            \pd[w_1]a_i  &= a_i(1 - a_i) \cdot x_i \\ 
+            \\
+            \pd[w_1]C &=\pd[w_1]\left(\avgsum[i, n](a_i - z_i)^2\right) =  \\ 
+                    &=\avgsum[i, n]\pd[w_1]\left((a_i - z_i)^2\right) =  \\ 
+                    &=\avgsum[i, n]2 \cdot (a_i - z_i)\pd[w_1]\left(a_i - z_i\right) = \\ 
+                    &=\avgsum[i, n]2 \cdot (a_i - z_i)\pd[w_1]a_i = \\ 
+            \pd[w_1]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot x_i \\ 
+        \end{align}
+    }
+    \item{
+        Partial Derivitive in respect to $w_2$
+        \begin{align}
+            a_i  &= \sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) = \\ 
+            \pd[w_2]a_i  &= \pd[w_2](\sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) = \\ 
+                         &= a_i(1 - a_i) \pd[w_2](x_i \cdot w_1 + y_i \cdot w_2 +b) = \\ 
+            \pd[w_2]a_i  &= a_i(1 - a_i) \cdot y_i \\ 
+            \\
+            \pd[w_2]C &=\pd[w_2]\left(\avgsum[i, n](a_i - z_i)^2\right) =  \\ 
+                    &=\avgsum[i, n]\pd[w_2]\left((a_i - z_i)^2\right) =  \\ 
+                    &=\avgsum[i, n]2 \cdot (a_i - z_i)\pd[w_2]\left(a_i - z_i\right) = \\ 
+                    &=\avgsum[i, n]2 \cdot (a_i - z_i)\pd[w_2]a_i = \\ 
+            \pd[w_2]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot y_i \\ 
+        \end{align}
+    }
+    \item{
+        Partial Derivitive in respect to $b$
+        \begin{align}
+            a_i  &= \sigma(x_i \cdot w_1 + y_i \cdot w_2 + b)  \\ 
+            \pd[b]a_i &= \pd[b](\sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) = \\ 
+                      &= a_i(1 - a_i)\pd[b](x_i \cdot w_1 + y_i \cdot w_2 +b) = \\ 
+                      &= a_i(1 - a_i) \cdot 1 = \\ 
+            \pd[b]a_i &= a_i(1 - a_i) \\ 
+            \\
+            \pd[b]C &=\pd[b]\left(\avgsum[i, n](a_i - z_i)^2\right) =  \\ 
+                    &=\avgsum[i, n]\pd[b]\left((a_i - z_i)^2\right) =  \\ 
+                    &=\avgsum[i, n]2 \cdot (a_i - z_i)\pd[b]\left(a_i - z_i\right) = \\ 
+                    &=\avgsum[i, n]2 \cdot (a_i - z_i)\pd[b]a_i = \\ 
+            \pd[b]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \\ 
+        \end{align}
+    }
+\end{enumerate}
+To summarize the parial derivitives are:
+\begin{align}
+    a_i  &= \sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) \\ 
+\pd[w_1]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot x_i \\ 
+\pd[w_2]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot y_i \\ 
+\pd[b]C   &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \\ 
+\end{align}
+
 
 \end{document}
