@@ -133,12 +133,26 @@ For this we will use PARTIAL DERIVITIVES this means that first we compute a deri
 To summarize the partial derivitives are:
 \begin{align}
     a_i  &= \sigma(x_i \cdot w_1 + y_i \cdot w_2 + b) \\ 
-    \tikzmark{A} a \tikzmark{B}
     \pd[w_1]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot x_i \\ 
     \pd[w_2]C &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \cdot y_i \\ 
     \pd[b]C   &=\avgsum[i, n]2 \cdot (a_i - z_i) \cdot a_i(1 - a_i) \\ 
 \end{align}
-
-\tikz[remember picture, overlay]\draw(A.south west)ractangle(B.north west)
-
+\newpage
+\subsection{Execution Time Comparison}
+Let's compare computation time differance between \textbf{Finite Difference} and \textbf{Gradient Descent}\\
+My machine is Lenovo Legion Slim 5:
+\begin{itemize}
+    \item {All computations are run on the CPU}
+    \item {CPU: AMD Rayzen 7 7840HS (16) 5.137Ghz}
+\end{itemize}
+The test:
+\begin{itemize}
+    \item {Neural network will try to learn the proper configuration for simulating NAND gate} 
+    \item {Comparison of training the model using the \textit{Finite Difference} method and \textit{Gradient Descent}} 
+    \item {8.000.000 iterations(epochs) of training will be run (overkill I know)} 
+\end{itemize}
+\textbf{RESULTS:}\\
+\indent \[ \textbf{Finite Difference}:\ \approx 1.556\ seconds \]
+\indent \[ \textbf{Gradient Descent}:\ \approx 0.473\ seconds \]
 \end{document}
+
