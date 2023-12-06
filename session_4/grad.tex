@@ -186,10 +186,11 @@ Let's define the mathematical model
     z &= \sigma(a^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
 \end{align}
 \subsection{Cost}
+\subsubsection{Cost Of The 2nd Layer}
 Let's define the cost function $C^{(2)}$ for the second layer of our model:
 \begin{align}
-    a_i^{(1)} &= \sigma(x_i \cdot w^{(1)} + b^{(1)})\\
-    a_i^{(2)} &= \sigma(a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
+    \arg[a_i, 1] &= \sigma(x_i \cdot w^{(1)} + b^{(1)})\\
+    \arg[a_i, 2] &= \sigma(a_i^{(1)} \cdot \arg[w, 2] + \arg[b, 2])\\
     \\
     \text{$a_i^{(l)}$}  \: &\text{...} \: \text{activation of the i-th sample of the l-th layer}
     \\
@@ -205,7 +206,7 @@ Before we start computing derivitives let's think about them \\
     \item {For each of these \textit{specialized} layers you compute the cost only for the variables that are nearly accessable}
     \item {Let's treat the \textit{previous activation} as a variable of the cost function and let's differentiate it}
     \item {The result of the differentiation of the cost function is actually an \textit{differance(error)} that we can use for the computation of the \textit{Difference(error)} of the inner layer}
-    \item {We continue to compute these \textit{differances(errors} for all layers all the way back to the \textit{input layer} => This is where the idea of \textbf{backpropagation} comes to play}
+    \item {We continue to compute these \textit{differances(errors} for all layers all the way back to the \textit{input layer} => This is where the idea of \textbf{back-propagation} comes to play}
 \end{itemize}
 Let's compute the derivitive $C^{(2)}$$'$ of our function\\
 \\
@@ -257,11 +258,89 @@ Let's compute the derivitive $C^{(2)}$$'$ of our function\\
                 &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot \pd[{\arg[a_i, 1]}]a_i^{(2)}    \\
     \pd[{\arg[a_i, 1]}]C^{(2)} &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot a_i^{(1)}(1 - a_i^{(1)}) \cdot \arg[w, 2]    \\
 \end{align}
-Let's define the cost function of the first layer $\arg[C, 1]$ as:
+\newpage
+\subsubsection{Cost Of The 1st layer}
+Here is en example of \textbf{back-propagation} in the works:
+\begin{itemize}
+    \item {We know that the expected value for the 2nd layer is $z_i$} 
+    \item {Let's use $e_i$ to donote the expacted value for i-th sample of the 1st layer} 
+    \item {$e_i$} is the differance between the activation of the first layer and the derivitive of the cost function of the second layer
+    $$e_i = \arg[a_i, 1] - \pd[{\arg[a_i, 1]}]C^{(2)}$$ \\
+    \item{Now we can define the cost function of the 1st layer as such}
+    $$\arg[C, 1] = \avgsum[i, n] (\arg[a_i, 1] - e_i)^2$$ \\
+\end{itemize}
+\newpage 
+\noindent Now that we can easily accessi whe weights and bias of the first layer let's compute the corresponding partial derivitives
 \begin{align}
-    \pd[{\arg[a_i, 1]}]C^{(2)} &=  \avgsum[i, n]2 \cdot (a_i^{(2)} - z_i) \cdot a_i^{(1)}(1 - a_i^{(1)}) \cdot \arg[w, 2]    \\
-    e_i  &= \arg[a_i, i] - (\arg[a_i, i] - \pd[{\arg[a_i, 1]}]C^{(2)})\\
-    \arg[C, 1] &= \avgsum[i, n] (\arg[a_i, 1] - e_i) \\
+    \arg[a_i, 1] &= \sigma(x_i \cdot w^{(1)} + b^{(1)})\\
+    \\
+    \pd[{\arg[w, 1]}]\arg[a_i, 1] 
+                 &= \arg[a_i, 1](1 - \arg[a_i, 1]) \cdot \arg[a_i, 0] \\ 
+    \pd[{\arg[b, 1]}]\arg[a_i, 1] 
+                 &= \arg[a_i, 1](1 - \arg[a_i, 1])  \\ 
+    \intertext{We know that the activation of 0th layer - $\arg[a_i, 0]$ represnets the i-th input value - $x_i$}
+    \Aboxed{\pd[{\arg[w, 1]}]\arg[a_i, 1] =\arg[a_i, 1](1 - \arg[a_i, 1]) \cdot x_i}
+    \Aboxed{\pd[{\arg[b, 1]}]\arg[a_i, 1] = \arg[a_i, 1](1 - \arg[a_i, 1])}   
 \end{align}
-Let's compute the derivitive $C^{(1)}$$'$ of our function\\
+\begin{align}
+    \pd[{\arg[w, 1]}]\arg[C, 1] 
+                 &= \pd[{\arg[w, 1]}] \left(\avgsum[i, n] (\arg[a_i, 1] - e_i)^2\right) = \\
+                 &= \avgsum[i, n] \pd[{\arg[w, 1]}](\arg[a_i, 1] - e_i)^2 = \\
+                 &= \avgsum[i, n] 3 \cdot (\arg[a_i, 1] - e_i) \cdot \pd[{\arg[w, 1]}](\arg[a_i, 1] - e_i) = \\
+                 &= \avgsum[i, n] 2 \cdot (\arg[a_i, 1] - e_i) \cdot \pd[{\arg[w, 1]}]\arg[a_i, 1] = \\
+                 &= \avgsum[i, n] 2 \cdot (\arg[a_i, 1] - (\arg[a_i, 1] - \pd[{\arg[a_i, 1]}]C^{(2)})) \cdot \pd[{\arg[w, 1]}]\arg[a_i, 1] = \\
+                 &= \avgsum[i, n] 2 \cdot (\arg[a_i, 1] - \arg[a_i, 1] + \pd[{\arg[a_i, 1]}]C^{(2)}) \cdot \pd[{\arg[w, 1]}]\arg[a_i, 1] = \\
+                 &= \avgsum[i, n] 2 \cdot \pd[{\arg[a_i, 1]}]C^{(2)} \cdot \pd[{\arg[w, 1]}]\arg[a_i, 1] = \\
+                 &= \avgsum[i, n] 2 \cdot \pd[{\arg[a_i, 1]}]C^{(2)} \cdot \arg[a_i, 1](1 - \arg[a_i, 1]) \cdot x_i = \\
+                 &= \avgsum[i, n] 2 \cdot \pd[{\arg[a_i, 1]}]C^{(2)} \cdot \arg[a_i, 1](1 - \arg[a_i, 1]) \cdot x_i \\
+    \\
+    \\
+    \pd[{\arg[b, 1]}]\arg[C, 1] &= \avgsum[i, n] 2 \cdot \pd[{\arg[a_i, 1]}]C^{(2)} \cdot \arg[a_i, 1](1 - \arg[a_i, 1])
+\end{align}
+
+\newpage
+
+\subsection{Arbitrary Neural Model With 1 Input}
+
+Let's say that our neuarl model has $m$ layers \\
+
+\subsubsection{Feed-Forward}
+TODO: Describe \\
+
+To calculate the activation of the $l$-th layer for the $i$-th sample you must multiply the activation of the $l-1$ layer with the weight of the $l$-th layer then add the bias of the $l$-th layer and apply an activation function to the result. \\
+\\
+\textit{As an example the sigmoid}-$\sigma$ \textit{function is used.} \\
+\\
+Let's also consider the activation of the 0th layer $\arg[a_i, 0]$ to represent the $i$-th sample of the input data - $x_i$
+
+\begin{align}
+    \arg[a_i, l] &= \sigma(\arg[a_i, l-1] \cdot \arg[w, l] + \arg[b, l])
+    \intertext{Partial derivitives}
+    \pd[{\arg[w, l]}]\arg[a_i, l]     &= \arg[a_i, l] \cdot (1 - \arg[a_i, l]) \cdot \arg[a_i, l-1] \\
+    \pd[{\arg[b, l]}]\arg[a_i, l]     &= \arg[a_i, l] \cdot (1 - \arg[a_i, l])                      \\ 
+    \pd[{\arg[a_i, l-1]}]\arg[a_i, l] &= \arg[a_i, l] \cdot (1 - \arg[a_i, l]) \cdot \arg[w, l] 
+\end{align}
+
+\subsubsection{Back-Propaggation}
+TODO: Describe \\
+Let's denote this differance $\arg[a_i, m] - z_i$ as a parial derivitive $\pd[{\arg[a_i, m+1]}]$
+
+\begin{align}
+    \arg[C, l] &= \avgsum[i, n] (\pd[{\arg[a_l, l]}]\arg[C, l+1])^2                                        \\                 
+    \pd[{\arg[w, l]}]\arg[C, l] &= \avgsum[i, n] 2 \cdot (\pd[{\arg[a_l, l]}]\arg[C, l+1]) \cdot x_i      \\  
+    \pd[{\arg[b, l]}]\arg[C, l] &= \avgsum[i, n] 2 \cdot (\pd[{\arg[a_l, l]}]\arg[C, l+1])               \\  
+    \pd[{\arg[a_i, l - 1]}]\arg[C, l] &= \avgsum[i, n] 2 \cdot (\arg[a_i, l] - z_i) \cdot \arg[a_i, l] \cdot (1 - \arg[a_i, l]) \cdot \arg[w, l] \\ 
+\end{align}
+
+\subsection{Combining Feed-Forward and Back-Propaggation}
+Let's describe the way we will use conecpts descrabed in the previous two sections togeter. \\
+\\
+Let's say we have $k$ samples of trainig data \\
+\\
+1. For each smaple we will \textbf{forward} the sample through the neural network until we reach the output. - \textbf{Feed-Forward} \\
+\textit{Node: Neural Network output is the} $\arg[a_i, m+1]$ \textit{activation} \\
+\\
+2. Straing from the $m+1$ activation let's move backwards through the neual network propagating the differances of layer activations - \textbf{Back-Propaggation} 
+
 \end{document}
+

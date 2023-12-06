@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2023.12.4)  5 DEC 2023 11:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2023.12.4)  6 DEC 2023 03:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -581,21 +581,61 @@ Underfull \hbox (badness 10000) in paragraph at lines 161--163
  []
 
 [6{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}]
-Underfull \hbox (badness 10000) in paragraph at lines 198--200
+Underfull \hbox (badness 10000) in paragraph at lines 199--201
 
  []
 
 [7]
-Underfull \hbox (badness 10000) in paragraph at lines 210--213
+Underfull \hbox (badness 10000) in paragraph at lines 211--214
 
  []
 
-[8] [9]
-Underfull \hbox (badness 10000) in paragraph at lines 265--267
+[8] [9] [10]
+Underfull \hbox (badness 10000) in paragraph at lines 268--269
 
  []
 
-[10] (./grad.aux)
+
+Underfull \hbox (badness 10000) in paragraph at lines 270--271
+
+ []
+
+[11] [12]
+Underfull \hbox (badness 10000) in paragraph at lines 305--306
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--309
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 310--315
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 310--315
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 336--344
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 336--344
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 336--344
+
+ []
+
+[13] [14] (./grad.aux)
  ***********
 LaTeX2e <2023-06-01>
 L3 programming layer <2023-06-05>
@@ -604,7 +644,7 @@ L3 programming layer <2023-06-05>
 Here is how much of TeX's memory you used:
  13595 strings out of 477695
  273735 string characters out of 5831648
- 1871759 words of memory out of 5000000
+ 1872759 words of memory out of 5000000
  33849 multiletter control sequences out of 15000+600000
  556055 words of font info for 57 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
@@ -616,11 +656,12 @@ lic/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr5.pfb></usr/share/t
 exmf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fonts/type1/public/lm/lms
 s10.pfb></usr/share/texmf/fonts/type1/public/lm/lmssbx10.pfb></usr/share/texmf/
 fonts/type1/public/lm/lmsso10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy1
-0.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy7.pfb>
-Output written on grad.pdf (10 pages, 188786 bytes).
+0.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy5.pfb></usr/share/texmf/fonts
+/type1/public/lm/lmsy7.pfb>
+Output written on grad.pdf (14 pages, 202717 bytes).
 PDF statistics:
- 109 PDF objects out of 1000 (max. 8388607)
- 71 compressed objects within 1 object stream
+ 127 PDF objects out of 1000 (max. 8388607)
+ 83 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 
