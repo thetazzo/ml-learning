@@ -15,7 +15,7 @@
 #define NF_ASSERT assert
 #endif // NF_ASSERT
 
-#define ARRAY_LEN(xs) sizeof((xs))/sizeof((xs)[0])
+#define NF_ARRAY_LEN(xs) sizeof((xs))/sizeof((xs)[0])
 
 float rand_float(void);
 
@@ -35,7 +35,7 @@ typedef struct {
     float  *es;
 } NF_Mat;
 
-#define MAT_AT(m, i, j) (m).es[(i)*(m).stride + (j)]
+#define NF_MAT_AT(m, i, j) (m).es[(i)*(m).stride + (j)]
 
 // ------------------------------------------------
 // Allocate memory for a matrix
@@ -73,6 +73,8 @@ typedef struct {
 
 NF_NN nf_nn_alloc(size_t *arch, size_t arch_count);
 
+void nf_nn_fill(NF_NN nn, float a);
+
 void nf_nn_print(NF_NN nn, const char *name);
 #define NF_NN_PRINT(nn) nf_nn_print((nn), #nn) 
 
@@ -82,9 +84,15 @@ void nf_nn_forward(NF_NN nn);
 
 float nf_nn_cost(NF_NN nn, NF_Mat ti, NF_Mat to);
 void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to);
+void nf_nn_backpropaga(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to);
 void nf_nn_learn(NF_NN nn, NF_NN gn, float rate);
 
 #endif // NF_H_
+
+#ifndef NF_IMPLEMENTATION
+#define NF_IMPLEMENTATION 
+#error "REMOVE THIS!"
+#endif
 
 #ifdef NF_IMPLEMENTATION
 
@@ -127,7 +135,7 @@ void nf_mat_rand(NF_Mat m, float low, float high)
 {
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {
-            MAT_AT(m, i, j) = rand_float()*(high - low) + low;
+            NF_MAT_AT(m, i, j) = rand_float()*(high - low) + low;
         }
     }
 }
@@ -136,7 +144,7 @@ void nf_mat_fill(NF_Mat m, float a)
 {
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {
-            MAT_AT(m, i, j) = a;
+            NF_MAT_AT(m, i, j) = a;
         }
     }
 }
@@ -147,7 +155,7 @@ NF_Mat nf_mat_row(NF_Mat m, size_t row)
         .rows = 1,
         .cols = m.cols,
         .stride = m.stride, 
-        .es = &MAT_AT(m, row, 0),
+        .es = &NF_MAT_AT(m, row, 0),
     };
 }
 
@@ -158,7 +166,7 @@ void nf_mat_copy(NF_Mat dst, NF_Mat src)
 
     for (size_t i = 0; i < dst.rows; ++i) {
         for (size_t j = 0; j < dst.cols; ++j) {
-            MAT_AT(dst, i, j) = MAT_AT(src, i, j);
+            NF_MAT_AT(dst, i, j) = NF_MAT_AT(src, i, j);
         }
     }
 }
@@ -173,9 +181,9 @@ void nf_mat_dot(NF_Mat dst, NF_Mat a, NF_Mat b)
 
     for (size_t i = 0; i < dst.rows; ++i) {
         for (size_t j = 0; j < dst.cols; ++j) {
-            MAT_AT(dst, i, j) = 0;
+            NF_MAT_AT(dst, i, j) = 0;
             for (size_t k = 0; k < n; ++k) {
-                MAT_AT(dst, i, j) += MAT_AT(a, i, k) * MAT_AT(b, k, j);
+                NF_MAT_AT(dst, i, j) += NF_MAT_AT(a, i, k) * NF_MAT_AT(b, k, j);
             }
         }
     }
@@ -189,7 +197,7 @@ void nf_mat_sum(NF_Mat dst, NF_Mat a)
 
     for (size_t i = 0; i < dst.rows; ++i) {
         for (size_t j = 0; j < dst.rows; ++j) {
-            MAT_AT(dst, i, j) += MAT_AT(a, i, j);
+            NF_MAT_AT(dst, i, j) += NF_MAT_AT(a, i, j);
         }
     }
 }
@@ -200,7 +208,7 @@ void nf_mat_print(NF_Mat m, const char *name, size_t padding)
     for (size_t i = 0; i < m.rows; ++i) {
         printf("%*s    ", (int) padding, "");
         for (size_t j = 0; j < m.cols; ++j) {
-            printf("%f ",  MAT_AT(m, i, j));
+            printf("%f ",  NF_MAT_AT(m, i, j));
         }
         printf("\n");
     }
@@ -211,7 +219,7 @@ void nf_mat_sig(NF_Mat m)
 {
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {
-            MAT_AT(m, i, j) = sigmoidf(MAT_AT(m, i, j));
+            NF_MAT_AT(m, i, j) = sigmoidf(NF_MAT_AT(m, i, j));
         }
     }
 }
@@ -242,6 +250,16 @@ NF_NN nf_nn_alloc(size_t *arch, size_t arch_count)
     }
 
     return nn;
+}
+
+void nf_nn_fill(NF_NN nn, float a)
+{
+    for (size_t l = 0; l < nn.count; ++l) {
+        nf_mat_fill(nn.ws[l], a);
+        nf_mat_fill(nn.bs[l], a);
+        nf_mat_fill(nn.as[l], a);
+    }
+    nf_mat_fill(nn.as[nn.count], a);
 }
 
 void nf_nn_print(NF_NN nn, const char *name)
@@ -294,7 +312,7 @@ float nf_nn_cost(NF_NN nn, NF_Mat ti, NF_Mat to)
         nf_nn_forward(nn);
         size_t q = to.cols;
         for (size_t j = 0; j < q; ++j) {
-            float d = MAT_AT(NF_NN_OUTPUT(nn), 0, j) - MAT_AT(y, 0, j);
+            float d = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, j) - NF_MAT_AT(y, 0, j);
             c += d*d;
         }
     }
@@ -310,19 +328,97 @@ void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to)
     for (size_t i = 0; i < nn.count; ++i) {
         for (size_t j = 0; j < nn.ws[i].rows; ++j) {
             for (size_t k = 0; k < nn.ws[i].cols; ++k) {
-                saved = MAT_AT(nn.ws[i], j, k);
-                MAT_AT(nn.ws[i], j, k) += eps;
-                MAT_AT(gn.ws[i], j, k) = (nf_nn_cost(nn, ti, to) - c)/eps;
-                MAT_AT(nn.ws[i], j, k) = saved;
+                saved = NF_MAT_AT(nn.ws[i], j, k);
+                NF_MAT_AT(nn.ws[i], j, k) += eps;
+                NF_MAT_AT(gn.ws[i], j, k) = (nf_nn_cost(nn, ti, to) - c)/eps;
+                NF_MAT_AT(nn.ws[i], j, k) = saved;
             }
         }
 
         for (size_t j = 0; j < nn.bs[i].rows; ++j) {
             for (size_t k = 0; k < nn.bs[i].cols; ++k) {
-                saved = MAT_AT(nn.bs[i], j, k);
-                MAT_AT(nn.bs[i], j, k) += eps;
-                MAT_AT(gn.bs[i], j, k) = (nf_nn_cost(nn, ti, to) - c)/eps;
-                MAT_AT(nn.bs[i], j, k) = saved;
+                saved = NF_MAT_AT(nn.bs[i], j, k);
+                NF_MAT_AT(nn.bs[i], j, k) += eps;
+                NF_MAT_AT(gn.bs[i], j, k) = (nf_nn_cost(nn, ti, to) - c)/eps;
+                NF_MAT_AT(nn.bs[i], j, k) = saved;
+            }
+        }
+    }
+}
+
+void nf_nn_backpropaga(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
+{
+    NF_ASSERT(ti.rows == to.rows);
+    NF_ASSERT(NF_NN_OUTPUT(nn).cols == to.cols);
+
+    size_t n = ti.rows;
+
+    nf_nn_fill(gn, 0);                                                          // clear the gradient network
+    
+    // Feed-Forward With Back-Propagation
+    // sample - i
+    for (size_t i = 0; i < ti.rows; ++i) {
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        //  Feed-Forward
+        //  forward the current sample(i-th row of ti) into the neual network
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        nf_mat_copy(NF_NN_INPUT(nn), nf_mat_row(ti, i));
+        nf_nn_forward(nn);
+
+        // clean up activations of the gradient network
+        for (size_t l = 0; l <= gn.count; ++l) {
+            nf_mat_fill(gn.as[l], 0);
+        }
+        
+        // Compute the differances of the next layer and store it as the output activaion (last layer activation) of the gradient neural network
+        for (size_t j = 0; j < to.cols; ++j) {
+            NF_MAT_AT(NF_NN_OUTPUT(gn), 0, j) = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, j) - NF_MAT_AT(to, i, j); 
+        }
+        
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        //  Back-Propagation
+        //  layer - l
+        //  Note: 
+        //   - in fact we have count-1 layers bacuase the 0th layer is the input layer -> the reason why I compute ws, bs, as of the (l-1) layer 
+        //   - a0 wb0 a1 wb1 a2 wb2 ... a(n-1) wb(n-1) an 
+        //   - l points to the layer after the current one
+        //   - the last layer is the output layer 
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        for (size_t l = nn.count; l > 0; --l) {
+            // current activation - j
+            for (size_t j = 0; j < nn.as[l].cols; ++j) {
+                float a_l  = NF_MAT_AT(nn.as[l], 0, j);                         // j-th activation of the l-th layer
+                float da_l = NF_MAT_AT(gn.as[l], 0, j);                         // j-th derivitive of the l-th activation
+
+                NF_MAT_AT(gn.bs[l-1], 0, j) += 2*da_l*a_l*(1 - a_l);            // compute the partial derivitive for the j-th bias of the previoius(l-1) layer
+                                                                                //
+                // previoius activation - k
+                for (size_t k = 0; k < nn.as[l-1].cols; ++k) {
+                                                                                // Note: from the way we compute activations we can deduce
+                                                                                //  - weight matrix col - j ~ j represents the column inside the matrix of current   activations
+                                                                                //  - weight matrix row - k ~ k represents the row    inside the matrix of previoius activations
+
+                    float pa_l = NF_MAT_AT(nn.as[l-1], 0, k);                   // k-th     activation of the previoius layer (l-1) 
+                    float w_pl = NF_MAT_AT(nn.ws[l-1], k, j);                   // k,j-th   weight of the previoius layer (l-1)
+ 
+                    NF_MAT_AT(gn.ws[l-1], k, j) += 2*da_l*a_l*(1 - a_l)*pa_l;   // compute the partial derivitive for the k,j-th weight of the previoius layer (l-1)
+
+                    NF_MAT_AT(gn.as[l-1], 0, k) += 2*da_l*a_l*(1 - a_l)*w_pl;   // compute the partial derivitive for the 
+                }
+            }
+        }
+    }
+    
+    // normalizse the gradint aka do the 1/n part
+    for (size_t l = 0; l < gn.count; ++l) {
+        for (size_t i = 0; i < gn.ws[l].rows; ++i) {
+            for (size_t j = 0; j < gn.ws[l].cols; ++j) {
+                NF_MAT_AT(gn.ws[l], i, j) /= n;
+            }
+        }
+        for (size_t i = 0; i < gn.bs[l].rows; ++i) {
+            for (size_t j = 0; j < gn.bs[l].cols; ++j) {
+                NF_MAT_AT(gn.bs[l], i, j) /= n;
             }
         }
     }
@@ -333,13 +429,13 @@ void nf_nn_learn(NF_NN nn, NF_NN gn, float rate)
     for (size_t i = 0; i < nn.count; ++i) {
         for (size_t j = 0; j < nn.ws[i].rows; ++j) {
             for (size_t k = 0; k < nn.ws[i].cols; ++k) {
-                MAT_AT(nn.ws[i], j, k) -= rate*MAT_AT(gn.ws[i], j, k);
+                NF_MAT_AT(nn.ws[i], j, k) -= rate*NF_MAT_AT(gn.ws[i], j, k);
             }
         }
 
         for (size_t j = 0; j < nn.bs[i].rows; ++j) {
             for (size_t k = 0; k < nn.bs[i].cols; ++k) {
-                MAT_AT(nn.bs[i], j, k) -= rate*MAT_AT(gn.bs[i], j, k);
+                NF_MAT_AT(nn.bs[i], j, k) -= rate*NF_MAT_AT(gn.bs[i], j, k);
             }
         }
     }

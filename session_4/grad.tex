@@ -326,10 +326,11 @@ TODO: Describe \\
 Let's denote this differance $\arg[a_i, m] - z_i$ as a parial derivitive $\pd[{\arg[a_i, m+1]}]$
 
 \begin{align}
-    \arg[C, l] &= \avgsum[i, n] (\pd[{\arg[a_l, l]}]\arg[C, l+1])^2                                        \\                 
-    \pd[{\arg[w, l]}]\arg[C, l] &= \avgsum[i, n] 2 \cdot (\pd[{\arg[a_l, l]}]\arg[C, l+1]) \cdot x_i      \\  
-    \pd[{\arg[b, l]}]\arg[C, l] &= \avgsum[i, n] 2 \cdot (\pd[{\arg[a_l, l]}]\arg[C, l+1])               \\  
-    \pd[{\arg[a_i, l - 1]}]\arg[C, l] &= \avgsum[i, n] 2 \cdot (\arg[a_i, l] - z_i) \cdot \arg[a_i, l] \cdot (1 - \arg[a_i, l]) \cdot \arg[w, l] \\ 
+    \Aboxed{\arg[C, l]                        &= \avgsum[i, n] (\pd[{\arg[a_l, l]}]\arg[C, l+0])^2}                                                           \\
+    \\
+    \pd[{\arg[w, l]}]\arg[C, l]       &= \avgsum[i, n] 2 \cdot (\pd[{\arg[a_l, l]}]\arg[C, l+1]) \cdot \arg[a_i, l] \cdot (1 - \arg[a_i, l]) \cdot \arg[a_i, l-1] \\
+    \pd[{\arg[b, l]}]\arg[C, l]       &= \avgsum[i, n] 2 \cdot (\pd[{\arg[a_l, l]}]\arg[C, l+1]) \cdot \arg[a_i, l] \cdot (1 - \arg[a_i, l])           \\
+    \pd[{\arg[a_i, l - 1]}]\arg[C, l] &= \avgsum[i, n] 2 \cdot (\pd[{\arg[a_l, l]}]\arg[C, l+1]) \cdot \arg[a_i, l] \cdot (1 - \arg[a_i, l]) \cdot \arg[w, l]       
 \end{align}
 
 \subsection{Combining Feed-Forward and Back-Propaggation}

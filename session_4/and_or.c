@@ -6,6 +6,11 @@
 
 #define ARRAY_LEN(xs) sizeof(xs)/sizeof(xs[0])
 
+float rand_float(void)
+{
+    return (float)rand()/(float)RAND_MAX;
+}
+
 float sigmoidf(float x)
 {
     return 1.f / (1.f + expf(-x));
@@ -33,11 +38,6 @@ float nand_td[][3] = {
 };
 
 #define train_data nand_td
-
-float rand_float(void)
-{
-    return (float)rand()/(float)RAND_MAX;
-}
 
 float cost(float w1, float w2, float b)
 {
@@ -101,6 +101,10 @@ void train(float *w1, float *w2, float *b, size_t titer, float rate)
     }
 }
 
+/**
+ *
+ * Clock() is used to mesure CPU clock and consequntly the perofrmance of the alghoritm
+ */
 int main() 
 {
     srand(time(0));

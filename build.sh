@@ -15,4 +15,5 @@ set -xe
 
 ## Session 4
 # clang -Wall -Wextra -o twice ./session_4/twice.c -lm
-clang -Wall -Wextra -o and_or ./session_4/and_or.c -lm
+# clang -Wall -Wextra -o and_or ./session_4/and_or.c -lm
+clang -Wall -Wextra -o xor ./session_4/xor.c -lm

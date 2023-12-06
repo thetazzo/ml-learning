@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2023.12.4)  6 DEC 2023 03:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2023.12.4)  6 DEC 2023 14:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -621,17 +621,17 @@ Underfull \hbox (badness 10000) in paragraph at lines 310--315
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 336--344
+Underfull \hbox (badness 10000) in paragraph at lines 337--345
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 336--344
+Underfull \hbox (badness 10000) in paragraph at lines 337--345
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 336--344
+Underfull \hbox (badness 10000) in paragraph at lines 337--345
 
  []
 
@@ -658,7 +658,7 @@ s10.pfb></usr/share/texmf/fonts/type1/public/lm/lmssbx10.pfb></usr/share/texmf/
 fonts/type1/public/lm/lmsso10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy1
 0.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy5.pfb></usr/share/texmf/fonts
 /type1/public/lm/lmsy7.pfb>
-Output written on grad.pdf (14 pages, 202717 bytes).
+Output written on grad.pdf (14 pages, 202807 bytes).
 PDF statistics:
  127 PDF objects out of 1000 (max. 8388607)
  83 compressed objects within 1 object stream
