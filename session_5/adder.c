@@ -4,7 +4,7 @@
 #define NF_IMPLEMENTATION
 #include "./nf.h"
 
-#define BITS 4
+#define BITS 4 
 
 int main()
 {
@@ -34,16 +34,15 @@ int main()
     nf_nn_rand(nn, 0, 1);
 
     float rate = 1;
-    for (size_t i = 0; i < 1000*20; ++i) {
+    for (size_t i = 0; i < 1000*10; ++i) {
 #if 1
         nf_nn_backprop(nn, gn, ti, to); 
 #else
         nf_nn_finite_diff(nn, gn, 1e-1, ti, to);
 #endif
         nf_nn_learn(nn, gn, rate);
-        printf("%zu: cost: %f\n", i, nf_nn_cost(nn, ti, to));
     }
-
+    printf("cost: %f\n", nf_nn_cost(nn, ti, to));
     printf("----------------------------\n");
 
     size_t fails = 0;
