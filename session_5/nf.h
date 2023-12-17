@@ -84,7 +84,7 @@ void nf_nn_forward(NF_NN nn);
 
 float nf_nn_cost(NF_NN nn, NF_Mat ti, NF_Mat to);
 void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to);
-void nf_nn_backpropaga(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to);
+void nf_nn_backprop(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to);
 void nf_nn_learn(NF_NN nn, NF_NN gn, float rate);
 
 #endif // NF_H_
@@ -196,7 +196,7 @@ void nf_mat_sum(NF_Mat dst, NF_Mat a)
     NF_ASSERT(dst.cols == a.cols);
 
     for (size_t i = 0; i < dst.rows; ++i) {
-        for (size_t j = 0; j < dst.rows; ++j) {
+        for (size_t j = 0; j < dst.cols; ++j) {
             NF_MAT_AT(dst, i, j) += NF_MAT_AT(a, i, j);
         }
     }
@@ -321,7 +321,7 @@ void nf_nn_forward(NF_NN nn)
     for (size_t i = 0; i < nn.count; ++i) {
         nf_mat_dot(nn.as[i+1], nn.as[i], nn.ws[i]);
         nf_mat_sum(nn.as[i+1], nn.bs[i]);
-        // nf_mat_sig(nn.as[i+1]);
+        nf_mat_sig(nn.as[i+1]);
         // nf_mat_lrelu(nn.as[i+1]);
         // nf_mat_relu(nn.as[i+1]);
     }
@@ -376,18 +376,16 @@ void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to)
     }
 }
 
-void nf_nn_backpropaga(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
+void nf_nn_backprop(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
 {
     NF_ASSERT(ti.rows == to.rows);
     NF_ASSERT(NF_NN_OUTPUT(nn).cols == to.cols);
-
     size_t n = ti.rows;
-
     nf_nn_fill(gn, 0);                                                          // clear the gradient network
     
     // Feed-Forward With Back-Propagation
     // sample - i
-    for (size_t i = 0; i < ti.rows; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         // --------------------------------------------------------------------------------------------------------------------------------------
         //  Feed-Forward
         //  forward the current sample(i-th row of ti) into the neual network
@@ -402,7 +400,7 @@ void nf_nn_backpropaga(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
         
         // Compute the differances of the next layer and store it as the output activaion (last layer activation) of the gradient neural network
         for (size_t j = 0; j < to.cols; ++j) {
-            NF_MAT_AT(NF_NN_OUTPUT(gn), 0, j) = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, j) - NF_MAT_AT(to, i, j); 
+            NF_MAT_AT(NF_NN_OUTPUT(gn), 0, j) = 2*(NF_MAT_AT(NF_NN_OUTPUT(nn), 0, j) - NF_MAT_AT(to, i, j)); 
         }
         
         // --------------------------------------------------------------------------------------------------------------------------------------
@@ -417,10 +415,11 @@ void nf_nn_backpropaga(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
         for (size_t l = nn.count; l > 0; --l) {
             // current activation - j
             for (size_t j = 0; j < nn.as[l].cols; ++j) {
-                float a_l  = NF_MAT_AT(nn.as[l], 0, j);                         // j-th activation of the l-th layer
-                float da_l = NF_MAT_AT(gn.as[l], 0, j);                         // j-th derivitive of the l-th activation
+                float a  = NF_MAT_AT(nn.as[l], 0, j);                           // j-th activation of the l-th layer
+                float da = NF_MAT_AT(gn.as[l], 0, j);                           // j-th derivitive of the l-th activation
+                float q  = a*(1-a);
 
-                NF_MAT_AT(gn.bs[l-1], 0, j) += 2*da_l*a_l*(1 - a_l);            // compute the partial derivitive for the j-th bias of the previoius(l-1) layer
+                NF_MAT_AT(gn.bs[l-1], 0, j) += 2*da*q;                  // compute the partial derivitive for the j-th bias of the previoius(l-1) layer
                                                                                 //
                 // previoius activation - k
                 for (size_t k = 0; k < nn.as[l-1].cols; ++k) {
@@ -428,12 +427,12 @@ void nf_nn_backpropaga(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
                                                                                 //  - weight matrix col - j ~ j represents the column inside the matrix of current   activations
                                                                                 //  - weight matrix row - k ~ k represents the row    inside the matrix of previoius activations
 
-                    float pa_l = NF_MAT_AT(nn.as[l-1], 0, k);                   // k-th     activation of the previoius layer (l-1) 
-                    float w_pl = NF_MAT_AT(nn.ws[l-1], k, j);                   // k,j-th   weight of the previoius layer (l-1)
+                    float pa = NF_MAT_AT(nn.as[l-1], 0, k);                     // k-th     activation of the previoius layer (l-1) 
+                    float pw = NF_MAT_AT(nn.ws[l-1], k, j);                     // k,j-th   weight of the previoius layer (l-1)
  
-                    NF_MAT_AT(gn.ws[l-1], k, j) += 2*da_l*a_l*(1 - a_l)*pa_l;   // compute the partial derivitive for the k,j-th weight of the previoius layer (l-1)
+                    NF_MAT_AT(gn.ws[l-1], k, j) += 2*da*q*pa;           // compute the partial derivitive for the k,j-th weight of the previoius layer (l-1)
 
-                    NF_MAT_AT(gn.as[l-1], 0, k) += 2*da_l*a_l*(1 - a_l)*w_pl;   // compute the partial derivitive for the 
+                    NF_MAT_AT(gn.as[l-1], 0, k) += 2*da*q*pw;           // compute the partial derivitive for the 
                 }
             }
         }
