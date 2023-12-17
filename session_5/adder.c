@@ -20,11 +20,13 @@ int main()
         size_t x = i/n;
         size_t y = i%n;
         size_t z = x + y;
+
         for (size_t j = 0; j < BITS; ++j) {
             NF_MAT_AT(ti, i, j)        = (x>>j)&1;
             NF_MAT_AT(ti, i, j + BITS) = (y>>j)&1;
             NF_MAT_AT(to, i, j)    = (z>>j)&1;
         }
+
         NF_MAT_AT(to, i, BITS) = z >= n;
     }
 
@@ -34,6 +36,7 @@ int main()
     nf_nn_rand(nn, 0, 1);
 
     float rate = 1;
+
     for (size_t i = 0; i < 1000*10; ++i) {
 #if 1
         nf_nn_backprop(nn, gn, ti, to); 
@@ -42,6 +45,7 @@ int main()
 #endif
         nf_nn_learn(nn, gn, rate);
     }
+
     printf("cost: %f\n", nf_nn_cost(nn, ti, to));
     printf("----------------------------\n");
 
