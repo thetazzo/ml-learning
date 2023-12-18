@@ -4,7 +4,37 @@
 #define NF_IMPLEMENTATION
 #include "./nf.h"
 
-#define BITS 4 
+#define BITS 2 
+
+void adder_validate(NF_NN nn, size_t n, size_t *fails) 
+{
+    for (size_t x = 0; x < n; ++x) {
+        for (size_t y = 0; y < n; ++y) {
+            size_t z = x + y;
+            for (size_t j = 0; j < BITS; ++j) {
+                NF_MAT_AT(NF_NN_INPUT(nn), 0, j)        = (x>>j)&1;
+                NF_MAT_AT(NF_NN_INPUT(nn), 0, j + BITS) = (y>>j)&1;
+            }
+            nf_nn_forward(nn);
+            if (NF_MAT_AT(NF_NN_OUTPUT(nn), 0, BITS) > 0.5f) {
+                if (z < n) {
+                    printf("%zu + %zu = (OVERFLOW<>%zu)\n", x, y, z);
+                    *fails += 1;
+                }
+            } else {
+                size_t a = 0;
+                for (size_t j = 0; j < BITS; ++j) {
+                    size_t bit = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, j) > 0.5f;
+                    a |= bit<<j;
+                }
+                if (z != a) {
+                    printf("%zu + %zu = (%zu<>%zu)\n", x, y, z, a);
+                    *fails += 1;
+                }
+            }
+        }
+    }
+}
 
 int main()
 {
@@ -36,46 +66,24 @@ int main()
     nf_nn_rand(nn, 0, 1);
 
     float rate = 1;
+    size_t epochs = 1000*5;
 
-    for (size_t i = 0; i < 1000*10; ++i) {
+    for (size_t i = 0; i < epochs; ++i) {
 #if 1
         nf_nn_backprop(nn, gn, ti, to); 
 #else
-        nf_nn_finite_diff(nn, gn, 1e-1, ti, to);
+        nf_nn_finite_diff(nn, gn, 1e-3, ti, to);
 #endif
         nf_nn_learn(nn, gn, rate);
+        printf("%zu: cost: %f\n", i, nf_nn_cost(nn, ti, to));
     }
 
-    printf("cost: %f\n", nf_nn_cost(nn, ti, to));
     printf("----------------------------\n");
 
     size_t fails = 0;
-    for (size_t x = 0; x < n; ++x) {
-        for (size_t y = 0; y < n; ++y) {
-            size_t z = x + y;
-            for (size_t j = 0; j < BITS; ++j) {
-                NF_MAT_AT(NF_NN_INPUT(nn), 0, j)        = (x>>j)&1;
-                NF_MAT_AT(NF_NN_INPUT(nn), 0, j + BITS) = (y>>j)&1;
-            }
-            nf_nn_forward(nn);
-            if (NF_MAT_AT(NF_NN_OUTPUT(nn), 0, BITS) > 0.5f) {
-                if (z < n) {
-                    printf("%zu + %zu = (OVERFLOW<>%zu)\n", x, y, z);
-                    fails += 1;
-                }
-            } else {
-                size_t a = 0;
-                for (size_t j = 0; j < BITS; ++j) {
-                    size_t bit = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, j) > 0.5f;
-                    a |= bit<<j;
-                }
-                if (z != a) {
-                    printf("%zu + %zu = (%zu<>%zu)\n", x, y, z, a);
-                    fails += 1;
-                }
-            }
-        }
-    }
+
+    adder_validate(nn, n, &fails);
+
     if (fails == 0) {
         printf("You are OK, you are OK Annie\n");
     } else {
