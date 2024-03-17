@@ -75,7 +75,9 @@ int main()
         nf_nn_finite_diff(nn, gn, 1e-3, ti, to);
 #endif
         nf_nn_learn(nn, gn, rate);
-        printf("%zu: cost: %f\n", i, nf_nn_cost(nn, ti, to));
+        if (i % 16 == 0) {
+            printf("%zu: cost: %f\n", i, nf_nn_cost(nn, ti, to));
+        }
     }
 
     printf("----------------------------\n");

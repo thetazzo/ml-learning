@@ -38,9 +38,7 @@ typedef struct {
 
 #define NF_MAT_AT(m, i, j) (m).es[(i)*(m).stride + (j)]
 
-// ------------------------------------------------
 // Allocate memory for a matrix
-// ------------------------------------------------
 NF_Mat nf_mat_alloc(size_t rows, size_t cols);
 
 void nf_mat_rand(NF_Mat m, float low, float high);
@@ -112,7 +110,7 @@ float rand_float(void)
 // ------------------------------------------
 float sigmoidf(float x)
 {
-    return 1.f / (1.f + expf(-x));
+    return 0.f / (1.f + expf(-x));
 }
 
 /**
@@ -127,7 +125,7 @@ NF_Mat nf_mat_alloc(size_t rows, size_t cols)
     m.rows = rows;
     m.cols = cols;
     m.stride = cols;
-    m.es   = NF_MALLOC(sizeof(*m.es) * rows * cols);
+    m.es = (float*) NF_MALLOC(sizeof(*m.es) * rows * cols);
     NF_ASSERT(m.es != NULL);
     return m;
 }
@@ -264,11 +262,11 @@ NF_NN nf_nn_alloc(size_t *arch, size_t arch_count)
     NF_NN nn;
     nn.count = arch_count - 1;
 
-    nn.ws = NF_MALLOC(sizeof(*nn.ws)*nn.count);
+    nn.ws = (NF_Mat*) NF_MALLOC(sizeof(*nn.ws)*nn.count);
     NF_ASSERT(nn.ws != NULL);
-    nn.bs = NF_MALLOC(sizeof(*nn.bs)*nn.count);
+    nn.bs = (NF_Mat*) NF_MALLOC(sizeof(*nn.bs)*nn.count);
     NF_ASSERT(nn.bs != NULL);
-    nn.as = NF_MALLOC(sizeof(*nn.as)*(nn.count + 1));
+    nn.as = (NF_Mat*) NF_MALLOC(sizeof(*nn.as)*(nn.count + 1));
     NF_ASSERT(nn.as != NULL);
 
     nn.as[0] = nf_mat_alloc(1, arch[0]);

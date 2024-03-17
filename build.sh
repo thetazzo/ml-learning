@@ -19,5 +19,8 @@ set -xe
 # clang -Wall -Wextra -o xor ./session_4/xor.c -lm
 
 ## Session 5
-clang -Wall -Wextra -o adder ./session_5/adder.c -lm
+# clang -Wall -Wextra -o adder ./session_5/adder.c -lm
+
+# Session 6
+clang -Wall -Wextra -o xor ./session_6/xor.c -lm
 
