@@ -1,7 +1,10 @@
 // nnf is a GUI app that trains and visualizes your neural network
 
 #include <assert.h>
+#include <math.h>
+#include <time.h>
 #include <ctype.h>
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -20,6 +23,12 @@ typedef struct {
    size_t count;
    size_t capacity;
 } NNF_Arch;
+
+typedef struct {
+    float *data;
+    size_t count;
+    size_t capacity;
+} NNF_Cost_Plot;
 
 #define NNF_DA_INIT_CAP 256
 #define nnf_da_append(da, item)                                                          \
@@ -42,11 +51,9 @@ char *args_shift(int *argc, char ***argv)
 }
 
 void nf_nn_render_raylib(NF_NN nn, int rx, int ry, int rw, int rh) {
-    Color bg_color   = { 0x18, 0x18, 0x18, 0xFF };
     Color low_color  = { 0xFF, 0x00, 0xFF, 0xFF };
     Color high_color = { 0x00, 0xFF, 0x00, 0xFF };
 
-    ClearBackground(bg_color);
 
     int neuron_rad = rh*0.03;
     int layer_border_hpad = 50;
@@ -88,8 +95,35 @@ void nf_nn_render_raylib(NF_NN nn, int rx, int ry, int rw, int rh) {
     }
 }
 
+void nnf_cost_plot_minmax(NNF_Cost_Plot plot, float *min, float *max)
+{
+    *min = 0;
+    *max = FLT_MIN;
+    for (size_t i = 0; i < plot.count; ++i) {
+        if (*max < plot.data[i]) { *max = plot.data[i]; }
+        if (*min > plot.data[i]) { *min = plot.data[i]; }
+    }
+}
+
+void nnf_plot_cost(NNF_Cost_Plot plot, int rx, int ry, int rw, int rh) 
+{
+    float min, max;
+    nnf_cost_plot_minmax(plot, &min, &max);
+
+    for (size_t i = 0; i+1 < plot.count; ++i) {
+        float x1 = rx + (float)rw/plot.count * i; 
+        float y1 = ry + (1-(plot.data[i] - min)/(max-min))*rh;
+        float x2 = rx + (float)rw/plot.count * (i+1); 
+        float y2 = ry + (1-(plot.data[i+1] - min)/(max-min))*rh;
+        DrawLineEx((Vector2){x1,y1}, (Vector2){x2,y2}, rh*0.004f, YELLOW);
+        DrawLine(0, ry+rh, rw+20, ry+rh, RAYWHITE);
+        DrawText("0", 0, ry+rh+5, 20, RAYWHITE);
+    }
+}
+
 int main(int argc, char **argv)
 {
+    srand(time(0));
     const char *program = args_shift(&argc, &argv);
 
     if (argc <= 0) {
@@ -160,21 +194,39 @@ int main(int argc, char **argv)
     Color bg_color = { 0x18, 0x18, 0x18, 0xFF };
     size_t epochs = 1000*5;
 
+    NNF_Cost_Plot plot = {0};
+
     size_t i = 0;
     while (!WindowShouldClose()) {
         if (i < epochs) {
             nf_nn_backprop(nn, gn, ti, to); 
+            //nf_nn_finite_diff(nn, gn, eps, ti, to);
             nf_nn_learn(nn, gn, rate);
             i += 1;
-            printf("cost: %f\n", nf_nn_cost(nn, ti,to));
+            float cost = nf_nn_cost(nn, ti, to);
+            nnf_da_append(&plot, cost);
         }
         BeginDrawing();
+        ClearBackground(bg_color);
         {
-            int rw = SCREEN_WIDTH/2;
-            int rh = SCREEN_HEIGHT*2/3;
-            int rx = SCREEN_WIDTH - rw;
-            int ry = SCREEN_HEIGHT/2 - rh/2;
+            int rx,ry,rw,rh;
+            rw = SCREEN_WIDTH/2;
+            rh = SCREEN_HEIGHT*2/3;
+            rx = 0;
+            ry = SCREEN_HEIGHT/2 - rh/2;
+            nnf_plot_cost(plot, rx, ry, rw, rh);
+
+            float cost = nf_nn_cost(nn, ti, to);
+            char c[50]; //size of the number
+            sprintf(c, "Cost: %g", cost);
+            DrawText(c, SCREEN_WIDTH/4 - 50, 50, 32, RAYWHITE);
+
+            rw = SCREEN_WIDTH/2;
+            rh = SCREEN_HEIGHT*2/3;
+            rx = SCREEN_WIDTH - rw;
+            ry = SCREEN_HEIGHT/2 - rh/2;
             nf_nn_render_raylib(nn, rx, ry, rw, rh);
+
         }
         EndDrawing();
     }
