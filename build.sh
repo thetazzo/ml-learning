@@ -27,5 +27,17 @@ set -xe
 # Session 7
 # clang -O3 -Wall -Wextra -o dump_nn ./session_7/dump_nn.c -lm
 # clang -O3 -Wall -Wextra -o xor ./session_7/xor.c -lm
-clang -Wall -Wextra -o adder ./session_7/adder.c -lm
+# clang -Wall -Wextra -o adder ./session_8/adder.c -lm
 
+# Session 8
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
+RFLAGS=`pkg-config --cflags raylib`
+RLIBS="`pkg-config --libs raylib` -ldl -lpthread"
+
+CFLAGS="-O3 -Wall -Wextra"
+LIBS="-lm"
+
+raylib_clang() {
+    clang $CFLAGS $RFLAGS -o $2 $1.c $RLIBS $LIBS;
+}
+raylib_clang ./session_8/adder adder
