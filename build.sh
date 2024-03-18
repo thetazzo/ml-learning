@@ -22,5 +22,10 @@ set -xe
 # clang -Wall -Wextra -o adder ./session_5/adder.c -lm
 
 # Session 6
-clang -Wall -Wextra -o xor ./session_6/xor.c -lm
+# clang -Wall -Wextra -o xor ./session_6/xor.c -lm
+
+# Session 7
+# clang -O3 -Wall -Wextra -o dump_nn ./session_7/dump_nn.c -lm
+# clang -O3 -Wall -Wextra -o xor ./session_7/xor.c -lm
+clang -Wall -Wextra -o adder ./session_7/adder.c -lm
 
