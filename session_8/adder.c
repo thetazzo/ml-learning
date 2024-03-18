@@ -51,7 +51,7 @@ void nf_nn_render_raylib(NF_NN nn) {
     }
 }
 
-#define BITS 2 
+#define BITS 4 
 
 void adder_validate(NF_NN nn, size_t n, size_t *fails) 
 {

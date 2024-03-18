@@ -2,8 +2,10 @@
 #define NF_H_ 
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 #ifndef NF_MALLOC
 #include <stdlib.h>
@@ -40,14 +42,12 @@ typedef struct {
 
 // Allocate memory for a matrix
 NF_Mat nf_mat_alloc(size_t rows, size_t cols);
-
+void nf_mat_save(FILE *out, NF_Mat m);
+NF_Mat nf_mat_load(FILE *in);
 void nf_mat_rand(NF_Mat m, float low, float high);
 void nf_mat_fill(NF_Mat m, float a);
-
 NF_Mat nf_mat_row(NF_Mat m, size_t row);
-
 void nf_mat_copy(NF_Mat dst, NF_Mat src);
-
 void nf_mat_dot(NF_Mat dst, NF_Mat a, NF_Mat b);
 void nf_mat_sum(NF_Mat dst, NF_Mat a);
 void nf_mat_print(NF_Mat m, const char *name, size_t padding);
@@ -127,6 +127,39 @@ NF_Mat nf_mat_alloc(size_t rows, size_t cols)
     m.stride = cols;
     m.es = (float*) NF_MALLOC(sizeof(*m.es) * rows * cols);
     NF_ASSERT(m.es != NULL);
+    return m;
+}
+
+void nf_mat_save(FILE *out, NF_Mat m)
+{
+    const char *magic = "nn.h.mat";
+    fwrite(magic, strlen(magic), 1, out);
+    fwrite(&m.rows, sizeof(m.rows), 1, out);
+    fwrite(&m.cols, sizeof(m.cols), 1, out);
+    for (size_t i = 0; i < m.rows; ++i) {
+        size_t n = fwrite(&NF_MAT_AT(m, i, 0), sizeof(*m.es), m.rows*m.cols, out);
+        while (n < m.cols && !ferror(out)) {
+            size_t k = fwrite(m.es + n, sizeof(*m.es), m.cols - n, out);
+            n += k;
+        }
+    }
+}
+
+NF_Mat nf_mat_load(FILE *in)
+{
+    uint64_t magic;
+    fread(&magic, sizeof(magic), 1, in);
+    NF_ASSERT(magic == 0x74616d2e682e6e6e);
+    size_t rows, cols;
+    fread(&rows, sizeof(rows), 1, in);
+    fread(&cols, sizeof(cols), 1, in);
+    NF_Mat m = nf_mat_alloc(rows, cols);
+    
+    size_t n = fread(m.es, sizeof(*m.es), rows*cols, in);
+    while (n < rows*cols && !ferror(in)) {
+        size_t k = fread(m.es, sizeof(*m.es) + n, rows*cols - n, in);
+        n += k;
+    }
     return m;
 }
 
