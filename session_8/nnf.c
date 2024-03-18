@@ -41,23 +41,23 @@ char *args_shift(int *argc, char ***argv)
     return result;
 }
 
-void nf_nn_render_raylib(NF_NN nn) {
+void nf_nn_render_raylib(NF_NN nn, int rx, int ry, int rw, int rh) {
     Color bg_color   = { 0x18, 0x18, 0x18, 0xFF };
     Color low_color  = { 0xFF, 0x00, 0xFF, 0xFF };
     Color high_color = { 0x00, 0xFF, 0x00, 0xFF };
 
     ClearBackground(bg_color);
 
-    int neuron_rad = 25;
+    int neuron_rad = rh*0.03;
     int layer_border_hpad = 50;
     int layer_border_vpad = 50;
 
     size_t arch_count = nn.count + 1;
 
-    int nn_width   = SCREEN_WIDTH  - 2*layer_border_hpad;
-    int nn_height  = SCREEN_HEIGHT - 2*layer_border_vpad;
-    int nn_y = SCREEN_HEIGHT/2 - nn_height/2;
-    int nn_x = SCREEN_WIDTH/2 - nn_width/2;
+    int nn_width   = rw  - 2*layer_border_hpad;
+    int nn_height  = rh - 2*layer_border_vpad;
+    int nn_x = rx + rw/2 - nn_width/2;
+    int nn_y = ry + rh/2 - nn_height/2;
 
     int layer_hpad = nn_width / arch_count;
     for (size_t l = 0; l < arch_count; ++l) {
@@ -72,7 +72,7 @@ void nf_nn_render_raylib(NF_NN nn) {
                     int cy2 = nn_y + j*layer_vpad2 + layer_vpad2/2;
                     float value = sigmoidf(NF_MAT_AT(nn.ws[l], j, i));
                     high_color.a = floorf(255.f*value);
-                    float thicc = 4.f;
+                    float thicc = rh*0.004f;
                     Vector2 p1 = {cx1, cy1};
                     Vector2 p2 = {cx2, cy2};
                     DrawLineEx(p1, p2, thicc, ColorAlphaBlend(low_color, high_color, WHITE));
@@ -170,7 +170,11 @@ int main(int argc, char **argv)
         }
         BeginDrawing();
         {
-            nf_nn_render_raylib(nn);
+            int rw = SCREEN_WIDTH/2;
+            int rh = SCREEN_HEIGHT*2/3;
+            int rx = SCREEN_WIDTH - rw;
+            int ry = SCREEN_HEIGHT/2 - rh/2;
+            nf_nn_render_raylib(nn, rx, ry, rw, rh);
         }
         EndDrawing();
     }
