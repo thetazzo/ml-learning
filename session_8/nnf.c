@@ -97,7 +97,7 @@ void nf_nn_render_raylib(NF_NN nn, int rx, int ry, int rw, int rh) {
 
 void nnf_cost_plot_minmax(NNF_Cost_Plot plot, float *min, float *max)
 {
-    *min = 0;
+    *min = FLT_MAX;
     *max = FLT_MIN;
     for (size_t i = 0; i < plot.count; ++i) {
         if (*max < plot.data[i]) { *max = plot.data[i]; }
@@ -109,11 +109,16 @@ void nnf_plot_cost(NNF_Cost_Plot plot, int rx, int ry, int rw, int rh)
 {
     float min, max;
     nnf_cost_plot_minmax(plot, &min, &max);
+    if (min > 0) min = 0;
+
+    size_t n = plot.count;
+
+    if (n < 100) n = 100;
 
     for (size_t i = 0; i+1 < plot.count; ++i) {
-        float x1 = rx + (float)rw/plot.count * i; 
+        float x1 = rx + (float)rw/n * i; 
         float y1 = ry + (1-(plot.data[i] - min)/(max-min))*rh;
-        float x2 = rx + (float)rw/plot.count * (i+1); 
+        float x2 = rx + (float)rw/n * (i+1); 
         float y2 = ry + (1-(plot.data[i+1] - min)/(max-min))*rh;
         DrawLineEx((Vector2){x1,y1}, (Vector2){x2,y2}, rh*0.004f, YELLOW);
         DrawLine(0, ry+rh, rw+20, ry+rh, RAYWHITE);
