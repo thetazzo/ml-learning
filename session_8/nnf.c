@@ -120,9 +120,11 @@ void nnf_plot_cost(NNF_Cost_Plot plot, int rx, int ry, int rw, int rh)
         float y1 = ry + (1-(plot.data[i] - min)/(max-min))*rh;
         float x2 = rx + (float)rw/n * (i+1); 
         float y2 = ry + (1-(plot.data[i+1] - min)/(max-min))*rh;
-        DrawLineEx((Vector2){x1,y1}, (Vector2){x2,y2}, rh*0.004f, YELLOW);
-        DrawLine(0, ry+rh, rw+20, ry+rh, RAYWHITE);
-        DrawText("0", 0, ry+rh+5, 20, RAYWHITE);
+
+        DrawLineEx((Vector2){x1,y1}, (Vector2){x2,y2}, rh*0.0035f, YELLOW);
+        DrawLine(0, ry+rh, rx+rw+60, ry+rh, RAYWHITE);
+        DrawLine(rx, ry+rh+50, rx, 50, RAYWHITE);
+        DrawText("0", 35, ry+rh+2, rh*0.02f, RAYWHITE);
     }
 }
 
@@ -191,50 +193,64 @@ int main(int argc, char **argv)
     NF_NN gn = nf_nn_alloc(arch.data, arch.count);
     nf_nn_rand(nn, 0, 1);
 
-    float rate = 1;
+    float rate = 0.5;
 
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "NNF");
     SetTargetFPS(60);
 
     Color bg_color = { 0x18, 0x18, 0x18, 0xFF };
-    size_t epochs = 1000*5;
 
     NNF_Cost_Plot plot = {0};
 
-    size_t i = 0;
+    size_t max_epoch = 5*1000;
+    size_t epoch = 0;
     while (!WindowShouldClose()) {
-        if (i < epochs) {
+        for (size_t i = 0; i<10&&epoch < max_epoch;++i) {
+#if 1
             nf_nn_backprop(nn, gn, ti, to); 
-            //nf_nn_finite_diff(nn, gn, eps, ti, to);
+#else
+            float eps = 1e-3;
+            nf_nn_finite_diff(nn, gn, eps, ti, to);
+#endif
             nf_nn_learn(nn, gn, rate);
-            i += 1;
+            epoch += 1;
             float cost = nf_nn_cost(nn, ti, to);
             nnf_da_append(&plot, cost);
-        }
+        }  
         BeginDrawing();
         ClearBackground(bg_color);
         {
             int rx,ry,rw,rh;
-            rw = SCREEN_WIDTH/2;
-            rh = SCREEN_HEIGHT*2/3;
-            rx = 0;
-            ry = SCREEN_HEIGHT/2 - rh/2;
+
+            int w = GetRenderWidth();
+            int h = GetRenderHeight();
+
+            rh = h*2/3;
+            rw = w/2;
+            rx = 50;
+            ry = h/2 - rh/2;
             nnf_plot_cost(plot, rx, ry, rw, rh);
 
-            float cost = nf_nn_cost(nn, ti, to);
-            char c[50]; //size of the number
-            sprintf(c, "Cost: %g", cost);
-            DrawText(c, SCREEN_WIDTH/4 - 50, 50, 32, RAYWHITE);
+            char buffer[256]; 
 
-            rw = SCREEN_WIDTH/2;
-            rh = SCREEN_HEIGHT*2/3;
-            rx = SCREEN_WIDTH - rw;
-            ry = SCREEN_HEIGHT/2 - rh/2;
+            float cost = nf_nn_cost(nn, ti, to);
+            sprintf(buffer, "Cost: %g", cost);
+            DrawText(buffer, w/4 - 150, 50, h*0.04f, RAYWHITE);
+
+            sprintf(buffer, "Epochs: %zu/%zu, Rate: %f", epoch, max_epoch, rate);
+            DrawText(buffer, w/2-550, h-150, h*0.04f, RAYWHITE);
+
+            rw = w/2;
+            rh = h*2/3;
+            rx = w - rw;
+            ry = h/2 - rh/2;
             nf_nn_render_raylib(nn, rx, ry, rw, rh);
 
         }
         EndDrawing();
     }
+    CloseWindow();
 
     return 0;
 }
