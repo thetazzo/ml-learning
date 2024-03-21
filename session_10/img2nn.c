@@ -264,8 +264,7 @@ int main(int argc, char **argv)
             nnf_plot_cost(plot, rx, ry, rw, rh);
 
             char buffer[256]; 
-            float avg_cost = cost/batch_count; 
-            sprintf(buffer, "Avg. cost: %g", avg_cost);
+            sprintf(buffer, "Cost: %g", plot.count > 0 ? plot.data[plot.count - 1] : 0);
             DrawText(buffer, rx+rw/2, 50, h*0.04f, RAYWHITE);
 
             sprintf(buffer, "Epochs: %zu/%zu, Rate: %f", epoch, max_epoch, rate);
