@@ -156,9 +156,7 @@ int main(int argc, char **argv)
         }
     }
 
-    nf_mat_shuffle_rows(td);
-
-    size_t arch[] = {2, 7, 7, 1};
+    size_t arch[] = {2, 10, 10, 1};
     NF_NN nn = nf_nn_alloc(arch, NF_ARRAY_LEN(arch));
     NF_NN gn = nf_nn_alloc(arch, NF_ARRAY_LEN(arch));
     nf_nn_rand(nn, -1, 1);
@@ -201,7 +199,7 @@ int main(int argc, char **argv)
     size_t batch_count = (td.rows + batch_size-1)/batch_size;
     size_t batch_begin = 0;
     float cost = 0.f;
-    float rate = 1.f;
+    float rate = 0.5f;
     bool isRunning = false;
 
     while (!WindowShouldClose()) {
@@ -246,6 +244,7 @@ int main(int argc, char **argv)
                 nnf_da_append(&plot, cost/batch_count);
                 cost = 0.0f;
                 batch_begin = 0;
+                nf_mat_shuffle_rows(td);
             }
         }  
         BeginDrawing();
