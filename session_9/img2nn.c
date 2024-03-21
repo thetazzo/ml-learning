@@ -238,6 +238,26 @@ int main(int argc, char **argv)
 
             rx += rw;
             nf_nn_render_raylib(nn, rx, ry, rw, rh);
+
+            rx += rw;
+            float scale = rh*0.02f;
+
+            // original image
+            for (int y = 0; y < img_height; ++y) {
+                for (int x = 0; x < img_width; ++x) {
+                    uint8_t pixel = data[y*img_width + x]; 
+                    ImageDrawPixel(
+                        &original_image,
+                        x,
+                        y,
+                        CLITERAL(Color){pixel, pixel, pixel, 255}
+                    );
+                }
+            }
+            UpdateTexture(original_texture, original_image.data);
+            DrawTextureEx(original_texture,CLITERAL(Vector2){rx, ry}, 0, scale, WHITE);
+
+            // preview image
             for (int y = 0; y < img_height; ++y) {
                 for (int x = 0; x < img_width; ++x) {
                     NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(img_width - 1);;
@@ -252,26 +272,8 @@ int main(int argc, char **argv)
                     );
                 }
             }
-
-            rx += rw;
-
             UpdateTexture(preview_texture, preview_image.data);
-            float scale = 20;
             DrawTextureEx(preview_texture,CLITERAL(Vector2){rx, ry + img_height*scale + 50}, 0, scale, WHITE);
-
-            for (int y = 0; y < img_height; ++y) {
-                for (int x = 0; x < img_width; ++x) {
-                    uint8_t pixel = data[y*img_width + x]; 
-                    ImageDrawPixel(
-                        &original_image,
-                        x,
-                        y,
-                        CLITERAL(Color){pixel, pixel, pixel, 255}
-                    );
-                }
-            }
-            UpdateTexture(original_texture, original_image.data);
-            DrawTextureEx(original_texture,CLITERAL(Vector2){rx, ry}, 0, scale, WHITE);
         }
         EndDrawing();
     }
