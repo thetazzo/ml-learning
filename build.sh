@@ -46,5 +46,8 @@ raylib_clang() {
 # clang $CFLAGS -o xor.gen ./session_8/xor.gen.c $LIBS
 
 # Session 9
-raylib_clang ./session_9/nnf nnf
-raylib_clang ./session_9/img2nn img2nn
+# raylib_clang ./session_9/nnf nnf
+# raylib_clang ./session_9/img2nn img2nn
+
+# Session 10
+raylib_clang ./session_10/img2nn img2nn
