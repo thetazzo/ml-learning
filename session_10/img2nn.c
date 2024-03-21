@@ -289,7 +289,7 @@ int main(int argc, char **argv)
                 }
             }
             UpdateTexture(original_texture, original_image.data);
-            DrawTextureEx(original_texture,CLITERAL(Vector2){rx, ry}, 0, scale, WHITE);
+            DrawTextureEx(original_texture,CLITERAL(Vector2){rx, ry - 25}, 0, scale, WHITE);
 
             // preview image
             for (int y = 0; y < img_height; ++y) {
@@ -307,7 +307,7 @@ int main(int argc, char **argv)
                 }
             }
             UpdateTexture(preview_texture, preview_image.data);
-            DrawTextureEx(preview_texture,CLITERAL(Vector2){rx, ry + img_height*scale + 50}, 0, scale, WHITE);
+            DrawTextureEx(preview_texture,CLITERAL(Vector2){rx, ry + img_height*scale + 25}, 0, scale, WHITE);
         }
         EndDrawing();
     }
