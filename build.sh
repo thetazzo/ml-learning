@@ -47,4 +47,4 @@ raylib_clang() {
 
 # Session 9
 raylib_clang ./session_9/nnf nnf
-raylib_clang ./session_9/img2mat img2mat
+raylib_clang ./session_9/img2nn img2nn

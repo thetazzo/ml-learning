@@ -182,7 +182,7 @@ int main(int argc, char **argv)
     size_t SCREEN_HEIGHT=(9*SC_FACTOR);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "NNF");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "img2nn");
     SetTargetFPS(60);
 
     Color bg_color = { 0x18, 0x18, 0x18, 0xFF };
