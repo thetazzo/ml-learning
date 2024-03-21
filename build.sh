@@ -40,7 +40,11 @@ LIBS="-lm"
 raylib_clang() {
     clang $CFLAGS $RFLAGS -o $2 $1.c $RLIBS $LIBS;
 }
-#raylib_clang ./session_8/adder adder
-raylib_clang ./session_8/nnf nnf
-clang $CFLAGS -o adder.gen ./session_8/adder.gen.c $LIBS
-clang $CFLAGS -o xor.gen ./session_8/xor.gen.c $LIBS
+# raylib_clang ./session_8/adder adder
+# raylib_clang ./session_8/nnf nnf
+# clang $CFLAGS -o adder.gen ./session_8/adder.gen.c $LIBS
+# clang $CFLAGS -o xor.gen ./session_8/xor.gen.c $LIBS
+
+# Session 9
+raylib_clang ./session_9/nnf nnf
+raylib_clang ./session_9/img2mat img2mat

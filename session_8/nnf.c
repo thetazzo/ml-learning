@@ -205,8 +205,12 @@ int main(int argc, char **argv)
 
     size_t max_epoch = 5*1000;
     size_t epoch = 0;
+    bool isRunning = false;
     while (!WindowShouldClose()) {
-        for (size_t i = 0; i<10&&epoch < max_epoch;++i) {
+        if (IsKeyPressed(KEY_SPACE)) {
+            isRunning = !isRunning;
+        }
+        for (size_t i = 0; i<10&&epoch<max_epoch&&isRunning;++i) {
 #if 1
             nf_nn_backprop(nn, gn, ti, to); 
 #else
