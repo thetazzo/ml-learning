@@ -121,7 +121,7 @@ char *p2m_shift_args(int *argc, char ***argv)
 }
 
 // neural network architecture
-size_t arch[] = {3, 7, 5, 1};
+size_t arch[] = {3, 7, 7, 1};
 
 int main(int argc, char **argv)
 {
@@ -212,23 +212,47 @@ int main(int argc, char **argv)
 
     NNF_Cost_Plot plot = {0};
 
-    Image preview_image = GenImageColor(img1_width, img1_height, BLACK);
-    Texture2D preview_texture = LoadTextureFromImage(preview_image);
+    size_t preview_width = 28;
+    size_t preview_height  = 28;
 
-    Image original_image = GenImageColor(img1_width, img1_height, BLACK);
-    // draw original image
+    Image preview_image1 = GenImageColor(preview_width, preview_height, BLACK);
+    Texture2D preview_texture1 = LoadTextureFromImage(preview_image1);
+
+    Image preview_image2 = GenImageColor(preview_width, preview_height, BLACK);
+    Texture2D preview_texture2 = LoadTextureFromImage(preview_image2);
+
+    Image preview_image3 = GenImageColor(preview_width, preview_height, BLACK);
+    Texture2D preview_texture3 = LoadTextureFromImage(preview_image3);
+
+    // Draw original image 1
+    Image original_image1 = GenImageColor(img1_width, img1_height, BLACK);
     for (int y = 0; y < img1_height; ++y) {
         for (int x = 0; x < img1_width; ++x) {
             uint8_t pixel = img1_data[y*img1_width + x]; 
             ImageDrawPixel(
-                &original_image,
+                &original_image1,
                 x,
                 y,
                 CLITERAL(Color){pixel, pixel, pixel, 255}
             );
         }
     }
-    Texture2D original_texture = LoadTextureFromImage(original_image);
+    Texture2D original_texture1 = LoadTextureFromImage(original_image1);
+
+    // Draw original image 2
+    Image original_image2 = GenImageColor(img2_width, img2_height, BLACK);
+    for (int y = 0; y < img2_height; ++y) {
+        for (int x = 0; x < img2_width; ++x) {
+            uint8_t pixel = img2_data[y*img2_width + x]; 
+            ImageDrawPixel(
+                &original_image2,
+                x,
+                y,
+                CLITERAL(Color){pixel, pixel, pixel, 255}
+            );
+        }
+    }
+    Texture2D original_texture2 = LoadTextureFromImage(original_image2);
 
     size_t max_epoch = 50*1000;
     size_t epoch = 0;
@@ -239,6 +263,8 @@ int main(int argc, char **argv)
     float cost = 0.f;
     float rate = 0.5f;
     bool isRunning = false;
+    float scroll = 0.5f;
+    bool scroll_dragging = false;
 
     while (!WindowShouldClose()) {
         if (IsKeyPressed(KEY_SPACE)) {
@@ -311,29 +337,117 @@ int main(int argc, char **argv)
             nf_nn_render_raylib(nn, rx, ry, rw, rh);
 
             rx += rw;
-            float scale = rh*0.02f;
+            float scale = rh*0.012f;
 
-            // Draw original image 
-            DrawTextureEx(original_texture,CLITERAL(Vector2){rx, ry - 25}, 0, scale, WHITE);
+            // Draw original image 1 
+            DrawTextureEx(original_texture1,CLITERAL(Vector2){rx, ry-50}, 0, scale, WHITE);
+            // Draw original image 2 
+            DrawTextureEx(original_texture2,CLITERAL(Vector2){rx+img1_width*scale, ry-50}, 0, scale, WHITE);
 
-            // Draw preview image
-            for (int y = 0; y < img1_height; ++y) {
-                for (int x = 0; x < img1_width; ++x) {
-                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(img1_width - 1);;
-                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(img1_height - 1);
-                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 2) = 1.f;
+            // Draw preview image 1
+            for (size_t y = 0; y < preview_height; ++y) {
+                for (size_t x = 0; x < preview_width; ++x) {
+                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(preview_width - 1);;
+                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(preview_height - 1);
+                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 2) = 0.f;
                     nf_nn_forward(nn);
                     uint8_t pixel = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0)*255.f;
                     ImageDrawPixel(
-                        &preview_image,
+                        &preview_image1,
                         x,
                         y,
                         CLITERAL(Color){pixel, pixel, pixel, 255}
                     );
                 }
             }
-            UpdateTexture(preview_texture, preview_image.data);
-            DrawTextureEx(preview_texture,CLITERAL(Vector2){rx, ry + img1_height*scale + 25}, 0, scale, WHITE);
+            UpdateTexture(preview_texture1, preview_image1.data);
+            DrawTextureEx(
+                preview_texture1,
+                CLITERAL(Vector2){rx, ry + preview_height*scale},
+                0,
+                scale,
+                WHITE
+            );
+
+            // Draw preview image 2
+            for (size_t y = 0; y < preview_height; ++y) {
+                for (size_t x = 0; x < preview_width; ++x) {
+                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(preview_width - 1);;
+                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(preview_height - 1);
+                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 2) = 1.f;
+                    nf_nn_forward(nn);
+                    uint8_t pixel = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0)*255.f;
+                    ImageDrawPixel(
+                        &preview_image2,
+                        x,
+                        y,
+                        CLITERAL(Color){pixel, pixel, pixel, 255}
+                    );
+                }
+            }
+            UpdateTexture(preview_texture2, preview_image2.data);
+            DrawTextureEx(
+                preview_texture2,
+                CLITERAL(Vector2){rx + preview_width*scale, ry + preview_height*scale},
+                0,
+                scale,
+                WHITE
+            );
+
+            // Draw preview image 3
+            for (size_t y = 0; y < preview_height; ++y) {
+                for (size_t x = 0; x < preview_width; ++x) {
+                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(preview_width - 1);;
+                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(preview_height - 1);
+                    NF_MAT_AT(NF_NN_INPUT(nn), 0, 2) = scroll;
+                    nf_nn_forward(nn);
+                    uint8_t pixel = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0)*255.f;
+                    ImageDrawPixel(
+                        &preview_image3,
+                        x,
+                        y,
+                        CLITERAL(Color){pixel, pixel, pixel, 255}
+                    );
+                }
+            }
+            UpdateTexture(preview_texture3, preview_image3.data);
+            DrawTextureEx(
+                preview_texture3,
+                CLITERAL(Vector2){rx + preview_width*scale*0.5, ry + preview_height*scale*2},
+                0,
+                scale,
+                WHITE
+            );
+
+            {
+                float pad = rh*0.04f;
+                Vector2 position = { rx, ry + preview_height*scale*3 + pad, };
+                Vector2 size = { preview_width*scale*2, rh*0.008f, };
+                float knob_radious = rh*0.02f;
+                DrawRectangleV(position, size, RAYWHITE);
+                Vector2 knob_position = {position.x + size.x*scroll, position.y + size.y*0.5f}; 
+                DrawCircleV(knob_position, knob_radious, RED);
+                sprintf(buffer, "%f", scroll);
+                DrawText(buffer, position.x + size.x*3/8, position.y + 50, rh*0.04f, RAYWHITE);
+
+                if (scroll_dragging) {
+                    float x = GetMousePosition().x;
+                    if (x < position.x) { x = position.x; }
+                    if (x > position.x + size.x) { x = position.x + size.x; }
+                    scroll = (x - position.x)/size.x;
+                }
+
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    Vector2 mouse_position = GetMousePosition();
+                    if (CheckCollisionPointCircle(mouse_position, knob_position, knob_radious)) {
+                        scroll_dragging = true;
+                    }
+                }
+
+                if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+                    scroll_dragging = false;
+                }
+            }
         }
         EndDrawing();
     }
