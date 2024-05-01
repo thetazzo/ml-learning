@@ -34,8 +34,18 @@ typedef struct {
     size_t capacity;
 } NFVT_Cost_Plot;
 
+#define NFVT_DA_INIT_CAP 256
+#define nfvt_da_append(da, item)                                                         \
+    do {                                                                                 \
+        if ((da)->count >= (da)->capacity) {                                             \
+            (da)->capacity = (da)->capacity == 0 ? NFVT_DA_INIT_CAP : (da)->capacity*2;  \
+            (da)->data = realloc((da)->data, (da)->capacity*sizeof(*(da)->data));        \
+            assert((da)->data != NULL && "Buy more RAM");                                \
+        }                                                                                \
+        (da)->data[(da)->count++] = (item);                                              \
+    } while (0)                                                                           
+
 void nfvt_widget(NFVT_Layout_Rect r);
-//void 
 
 void nfvt_nn_render(NF_NN nn, float rx, float ry, float rw, float rh);
 void nfvt_plot_cost(NFVT_Cost_Plot plot, int rx, int ry, int rw, int rh);
