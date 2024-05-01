@@ -59,4 +59,7 @@ raylib_clang() {
 # raylib_clang ./session_12/img2nn img2nn
 
 # Session 13
-raylib_clang ./session_13/img2nn img2nn
+# raylib_clang ./session_13/img2nn img2nn
+
+# Session 14
+raylib_clang ./session_14/img2nn img2nn
