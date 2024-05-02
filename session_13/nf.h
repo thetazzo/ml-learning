@@ -8,7 +8,7 @@
 
 #define NF_BACKPROP_TRADITIONAL
 // TODO: reafacor this to be part of the NF_NN typedef
-#define NF_NN_ACT NF_ACT_TANH
+#define NF_NN_ACT NF_ACT_RELU
 
 #ifndef NF_MALLOC
 #include <stdlib.h>

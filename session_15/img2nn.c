@@ -12,13 +12,16 @@ char *p2m_shift_args(int *argc, char ***argv)
     return result;
 }
 
-void nf_v_preview_image(NF_NN nn, float rx, float ry, size_t preview_width, size_t preview_height, float scale, Image preview_image, Texture2D preview_texture, float pimg_index)
+void nf_v_preview_image(NF_NN nn, NF_V_Rect r, float scale, float pimg_index)
 {
+    Image preview_image = GenImageColor(r.w, r.h, BLACK);
+    Texture2D preview_texture = LoadTextureFromImage(preview_image);
+
     // Draw preview image 1
-    for (size_t y = 0; y < preview_height; ++y) {
-        for (size_t x = 0; x < preview_width; ++x) {
-            NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(preview_width - 1);;
-            NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(preview_height - 1);
+    for (size_t y = 0; y < r.h; ++y) {
+        for (size_t x = 0; x < r.w; ++x) {
+            NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(r.w - 1);;
+            NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(r.h - 1);
             NF_MAT_AT(NF_NN_INPUT(nn), 0, 2) = pimg_index;
             nf_nn_forward(nn);
             float act = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0);
@@ -36,7 +39,7 @@ void nf_v_preview_image(NF_NN nn, float rx, float ry, size_t preview_width, size
     UpdateTexture(preview_texture, preview_image.data);
     DrawTextureEx(
         preview_texture,
-        CLITERAL(Vector2){rx, ry + preview_height*scale},
+        CLITERAL(Vector2){r.x, r.y + r.h*scale},
         0,
         scale,
         WHITE
@@ -45,7 +48,7 @@ void nf_v_preview_image(NF_NN nn, float rx, float ry, size_t preview_width, size
 
 // neural network architecture
 //size_t arch[] = {3, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 1};
-size_t arch[] = {3, 11, 11, 9, 1};
+size_t arch[] = {3, 11, 18, 9, 4, 1};
 
 int main(int argc, char **argv)
 {
@@ -281,11 +284,14 @@ int main(int argc, char **argv)
             DrawTextureEx(original_texture2,CLITERAL(Vector2){isr.x+img1_width*scale, isr.y}, 0, scale, WHITE);
             
             // Draw preview image 1
-            nf_v_preview_image(nn, isr.x, isr.y, preview_width, preview_height, scale, preview_image1, preview_texture1, 0.f);
+            NF_V_Rect pi1r = { isr.x, isr.y, preview_width, preview_height };
+            nf_v_preview_image(nn, pi1r, scale, 0.f);
             // Draw preview image 2
-            nf_v_preview_image(nn, isr.x + preview_width*scale, isr.y, preview_width, preview_height, scale, preview_image2, preview_texture2, 1.f);
+            NF_V_Rect pi2r = { isr.x + preview_width*scale, isr.y, preview_width, preview_height };
+            nf_v_preview_image(nn, pi2r, scale, 1.f);
             // Draw preview image 3
-            nf_v_preview_image(nn, isr.x + preview_width/2*scale, isr.y+preview_height*scale, preview_width, preview_height, scale, preview_image3, preview_texture3, preview_scroll);
+            NF_V_Rect pi3r = { isr.x + preview_width/2*scale, isr.y+preview_height*scale, preview_width, preview_height };
+            nf_v_preview_image(nn, pi3r, scale, preview_scroll);
             // Preview image 3 slider
             nf_v_slider(&preview_scroll, &preview_scroll_dragging, isr.x - isr.w/12, isr.y+ 3*(preview_height*scale) + 75, isr.w, 20);
             nf_v_layout_end();

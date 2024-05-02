@@ -10,7 +10,7 @@
 
 #define NF_BACKPROP_TRADITIONAL
 // TODO: reafacor this to be part of the NF_NN typedef
-#define NF_NN_ACT NF_ACT_SIG
+#define NF_NN_ACT NF_ACT_TANH
 
 #ifndef NF_MALLOC
 #include <stdlib.h>
@@ -212,6 +212,7 @@ float nf_sigmoidf(float x)
 
 float nf_reluf(float x)
 {
+    assert(0 && "this is broken");
     if (x > 0) {
         return x;
     }
