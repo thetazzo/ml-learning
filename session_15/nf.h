@@ -116,8 +116,6 @@ void nf_nn_learn(NF_NN nn, NF_NN gn, float rate);
 
 #include "raylib.h"
 #include "raymath.h"
-#include "stb_image.h"
-#include "stb_image_write.h"
 
 typedef struct {
     float x;
@@ -181,8 +179,14 @@ void nf_v_plot_cost(NF_V_Plot plot, NF_V_Rect);
 void nf_v_slider(float *value, bool *is_dragging, float rx, float ry, float rw, float rh);
 
 void nf_v_render_single_frame(NF_NN nn, float img_index);
+
+#ifdef NF_IMAGE_GENERATION
+#include "stb_image.h"
+#include "stb_image_write.h"
+
 int  nf_v_render_upscaled_screenshot(NF_NN nn, float img_index, const char *out_file_path);
 int  nf_v_render_upscaled_video(NF_NN nn, float duration, const char *out_file_path);
+#endif //NF_IMAGE_GENERATION
 
 #endif // NF_VISUALISATION
 
@@ -869,6 +873,7 @@ void nf_v_render_single_frame(NF_NN nn, float img_index)
     }
 }
 
+#ifdef NF_IMAGE_GENERATION
 int nf_v_render_upscaled_screenshot(NF_NN nn, float img_index, const char *out_file_path)
 {
     assert(out_pixles != NULL);
@@ -966,6 +971,7 @@ int nf_v_render_upscaled_video(NF_NN nn, float duration, const char *out_file_pa
     printf("Generated %s\n", out_file_path);
     return 0;
 }
+#endif // NF_IMAGE_GENERATION
 #endif // NF_VISUALISATION
 
 #endif // NF_IMPLEMENTATION

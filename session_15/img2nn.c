@@ -1,4 +1,5 @@
 #define NF_VISUALISATION
+#define NF_IMAGE_GENERATION
 #define NF_IMPLEMENTATION
 #include "nf.h"
 
@@ -9,6 +10,37 @@ char *p2m_shift_args(int *argc, char ***argv)
     (*argc) -= 1; 
     (*argv) += 1;
     return result;
+}
+
+void nf_v_preview_image(NF_NN nn, float rx, float ry, size_t preview_width, size_t preview_height, float scale, Image preview_image, Texture2D preview_texture, float pimg_index)
+{
+    // Draw preview image 1
+    for (size_t y = 0; y < preview_height; ++y) {
+        for (size_t x = 0; x < preview_width; ++x) {
+            NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(preview_width - 1);;
+            NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(preview_height - 1);
+            NF_MAT_AT(NF_NN_INPUT(nn), 0, 2) = pimg_index;
+            nf_nn_forward(nn);
+            float act = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0);
+            if (act < 0) act = 0;
+            if (act > 1) act = 1;
+            uint8_t pixel = act*255.f;
+            ImageDrawPixel(
+                &preview_image,
+                x,
+                y,
+                CLITERAL(Color){pixel, pixel, pixel, 255}
+            );
+        }
+    }
+    UpdateTexture(preview_texture, preview_image.data);
+    DrawTextureEx(
+        preview_texture,
+        CLITERAL(Vector2){rx, ry + preview_height*scale},
+        0,
+        scale,
+        WHITE
+    );
 }
 
 // neural network architecture
@@ -235,132 +267,28 @@ int main(int argc, char **argv)
             DrawText(buffer, fsr.x+fsr.w + 100, fsr.y+fsr.h-40, fsr.h*0.05f, RAYWHITE);
 
             sprintf(buffer, "Epochs: %zu/%zu, Rate: %f", epoch, max_epoch, rate);
-            DrawText(buffer, fsr.x+fsr.w + 50, 20, fsr.h*0.04f, RAYWHITE);
+            DrawText(buffer, fsr.x+fsr.w + 50, 20, fsr.h*0.03f, RAYWHITE);
 
             nf_v_slider(&rate, &lrate_scroll_dragging, fsr.x, fsr.y, fsr.w, 20);
             nf_v_nn_render(nn, nf_v_layout_slot());
-            nf_v_layout_end();
 
             NF_V_Rect isr = nf_v_layout_slot();
-
+            isr.x += isr.w/12;
+            isr.y += isr.h/12;
             // Draw original image 1 
-            //DrawTextureEx(original_texture1,CLITERAL(Vector2){cpr.x, cpr.y-50}, 0, scale, WHITE);
+            DrawTextureEx(original_texture1,CLITERAL(Vector2){isr.x, isr.y}, 0, scale, WHITE);
             // Draw original image 2 
-            //DrawTextureEx(original_texture2,CLITERAL(Vector2){cpr.x+img1_width*scale, cpr.y-50}, 0, scale, WHITE);
-
+            DrawTextureEx(original_texture2,CLITERAL(Vector2){isr.x+img1_width*scale, isr.y}, 0, scale, WHITE);
+            
             // Draw preview image 1
-            //for (size_t y = 0; y < preview_height; ++y) {
-            //    for (size_t x = 0; x < preview_width; ++x) {
-            //        NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(preview_width - 1);;
-            //        NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(preview_height - 1);
-            //        NF_MAT_AT(NF_NN_INPUT(nn), 0, 2) = 0.f;
-            //        nf_nn_forward(nn);
-            //        float act = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0);
-            //        if (act < 0) act = 0;
-            //        if (act > 1) act = 1;
-            //        uint8_t pixel = act*255.f;
-            //        ImageDrawPixel(
-            //            &preview_image1,
-            //            x,
-            //            y,
-            //            CLITERAL(Color){pixel, pixel, pixel, 255}
-            //        );
-            //    }
-            //}
-            //UpdateTexture(preview_texture1, preview_image1.data);
-            //DrawTextureEx(
-            //    preview_texture1,
-            //    CLITERAL(Vector2){cpr.x, cpr.y + preview_height*scale},
-            //    0,
-            //    scale,
-            //    WHITE
-            //);
-
-            //// Draw preview image 2
-            //for (size_t y = 0; y < preview_height; ++y) {
-            //    for (size_t x = 0; x < preview_width; ++x) {
-            //        NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(preview_width - 1);;
-            //        NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(preview_height - 1);
-            //        NF_MAT_AT(NF_NN_INPUT(nn), 0, 2) = 1.f;
-            //        nf_nn_forward(nn);
-            //        float act = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0);
-            //        if (act < 0) act = 0;
-            //        if (act > 1) act = 1;
-            //        uint8_t pixel = act*255.f;
-            //        ImageDrawPixel(
-            //            &preview_image2,
-            //            x,
-            //            y,
-            //            CLITERAL(Color){pixel, pixel, pixel, 255}
-            //        );
-            //    }
-            //}
-            //UpdateTexture(preview_texture2, preview_image2.data);
-            //DrawTextureEx(
-            //    preview_texture2,
-            //    CLITERAL(Vector2){cpr.x + preview_width*scale, cpr.y + preview_height*scale},
-            //    0,
-            //    scale,
-            //    WHITE
-            //);
-
-            //// Draw preview image 3
-            //for (size_t y = 0; y < preview_height; ++y) {
-            //    for (size_t x = 0; x < preview_width; ++x) {
-            //        NF_MAT_AT(NF_NN_INPUT(nn), 0, 0) = (float)x/(preview_width - 1);;
-            //        NF_MAT_AT(NF_NN_INPUT(nn), 0, 1) = (float)y/(preview_height - 1);
-            //        NF_MAT_AT(NF_NN_INPUT(nn), 0, 2) = preview_scroll;
-            //        nf_nn_forward(nn);
-            //        float act = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0);
-            //        if (act < 0) act = 0;
-            //        if (act > 1) act = 1;
-            //        uint8_t pixel = act*255.f;
-            //        ImageDrawPixel(
-            //            &preview_image3,
-            //            x,
-            //            y,
-            //            CLITERAL(Color){pixel, pixel, pixel, 255}
-            //        );
-            //    }
-            //}
-            //UpdateTexture(preview_texture3, preview_image3.data);
-            //DrawTextureEx(
-            //    preview_texture3,
-            //    CLITERAL(Vector2){cpr.x, cpr.y + preview_height*scale*2},
-            //    0,
-            //    scale*2,
-            //    WHITE
-            //);
-
-            //{
-            //    float pad = cpr.h*0.04f;
-            //    Vector2 position = { cpr.x, cpr.y + preview_height*scale*4 + pad, };
-            //    Vector2 size = { preview_width*scale*2, cpr.h*0.008f, };
-            //    float knob_radious = cpr.h*0.02f;
-            //    DrawRectangleV(position, size, RAYWHITE);
-            //    Vector2 knob_position = {position.x + size.x*preview_scroll, position.y + size.y*0.5f}; 
-            //    DrawCircleV(knob_position, knob_radious, RED);
-            //    sprintf(buffer, "%f", preview_scroll);
-            //    DrawText(buffer, position.x + size.x*3/8, position.y + 50, cpr.h*0.04f, RAYWHITE);
-
-            //    if (preview_scroll_dragging) {
-            //        float x = GetMousePosition().x;
-            //        if (x < position.x) { x = position.x; }
-            //        if (x > position.x + size.x) { x = position.x + size.x; }
-            //        preview_scroll = (x - position.x)/size.x;
-            //    }
-
-            //    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            //        Vector2 mouse_position = GetMousePosition();
-            //        if (CheckCollisionPointCircle(mouse_position, knob_position, knob_radious)) {
-            //            preview_scroll_dragging = true;
-            //        }
-            //    }
-
-            //    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            //        preview_scroll_dragging = false;
-            //    }
-            //}
+            nf_v_preview_image(nn, isr.x, isr.y, preview_width, preview_height, scale, preview_image1, preview_texture1, 0.f);
+            // Draw preview image 2
+            nf_v_preview_image(nn, isr.x + preview_width*scale, isr.y, preview_width, preview_height, scale, preview_image2, preview_texture2, 1.f);
+            // Draw preview image 3
+            nf_v_preview_image(nn, isr.x + preview_width/2*scale, isr.y+preview_height*scale, preview_width, preview_height, scale, preview_image3, preview_texture3, preview_scroll);
+            // Preview image 3 slider
+            nf_v_slider(&preview_scroll, &preview_scroll_dragging, isr.x - isr.w/12, isr.y+ 3*(preview_height*scale) + 75, isr.w, 20);
+            nf_v_layout_end();
         }
         EndDrawing();
     }
