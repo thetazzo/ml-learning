@@ -115,6 +115,7 @@ void nf_nn_learn(NF_NN nn, NF_NN gn, float rate);
 #include <float.h>
 
 #include "raylib.h"
+#include "raymath.h"
 #include "stb_image.h"
 #include "stb_image_write.h"
 
@@ -177,6 +178,8 @@ void nf_v_widget(NF_V_Rect r);
 
 void nf_v_nn_render(NF_NN nn, NF_V_Rect r);
 void nf_v_plot_cost(NF_V_Plot plot, NF_V_Rect);
+void nf_v_slider(float *value, bool *is_dragging, float rx, float ry, float rw, float rh);
+
 void nf_v_render_single_frame(NF_NN nn, float img_index);
 int  nf_v_render_upscaled_screenshot(NF_NN nn, float img_index, const char *out_file_path);
 int  nf_v_render_upscaled_video(NF_NN nn, float duration, const char *out_file_path);
@@ -795,6 +798,44 @@ void nf_v_plot_cost(NF_V_Plot plot, NF_V_Rect r)
         DrawLine(r.x, r.y+r.h+50, r.x, 50, RAYWHITE);
         DrawCircle(r.x, r.y+r.h, r.h*0.008f, RAYWHITE);
         DrawText("0", r.x-r.h*0.03f, r.y+r.h+2, r.h*0.03f, RAYWHITE);
+    }
+}
+
+void nf_v_slider(float *value, bool *is_dragging, float rx, float ry, float rw, float rh)
+{
+    float knob_radius = rh;
+    Vector2 bar_size = {
+        .x = rw - 2*knob_radius,
+        .y = rh*0.25,
+    };
+    Vector2 bar_position = {
+        .x = rx + knob_radius,
+        .y = ry + rh/2 - bar_size.y/2
+    };
+    DrawRectangleV(bar_position, bar_size, WHITE);
+
+    Vector2 knob_position = {
+        .x = bar_position.x + bar_size.x*(*value),
+        .y = ry + rh/2
+    };
+    DrawCircleV(knob_position, knob_radius, RED);
+
+    if (*is_dragging) {
+        float x = GetMousePosition().x;
+        if (x < bar_position.x) x = bar_position.x;
+        if (x > bar_position.x + bar_size.x) x = bar_position.x + bar_size.x;
+        *value = (x - bar_position.x)/bar_size.x;
+    }
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        Vector2 mouse_position = GetMousePosition();
+        if (Vector2Distance(mouse_position, knob_position) <= knob_radius) {
+            *is_dragging = true;
+        }
+    }
+
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        *is_dragging = false;
     }
 }
 

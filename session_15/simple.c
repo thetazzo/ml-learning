@@ -5,7 +5,7 @@
 #include "nf.h"
 
 int main() {
-    size_t arch[] = {2, 4, 4, 2};
+    size_t arch[] = {2, 3, 4, 2};
     NF_NN nn = nf_nn_alloc(arch, NF_ARRAY_LEN(arch));
     nf_nn_rand(nn, -1, 1);
     NF_NN_PRINT(nn);

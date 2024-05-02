@@ -1,20 +1,3 @@
-#include <assert.h>
-#include <float.h>
-#include <math.h>
-#include <stdio.h>
-#include <errno.h>
-#include <errno.h>
-
-// posix specific headers
-// allows forking childs in linux
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-#include "raylib.h"
-#include "stb_image.h"
-#include "stb_image_write.h"
-
 #define NF_VISUALISATION
 #define NF_IMPLEMENTATION
 #include "nf.h"
@@ -240,61 +223,25 @@ int main(int argc, char **argv)
         {
             int w = GetRenderWidth();
             int h = GetRenderHeight();
-
-            //NF_V_Rect cpr = {0};
-            //cpr.w = w/3;
-            //cpr.h = h*2/3;
-            //cpr.x = 50;
-            //cpr.y = h/2 - cpr.h/2;
-            //float scale = cpr.h*0.009f;
-
+            float scale = h*0.009f;
             float frame = h*0.03;
 
             nf_v_layout_begin(VLO_HORZ, (CLITERAL(NF_V_Rect){frame,frame,w-2*frame,h-2*frame}), 3, 0);
-
-            NF_V_Rect r = nf_v_layout_slot();
-            nf_v_plot_cost(plot, r);
+            NF_V_Rect fsr = nf_v_layout_slot();
+            nf_v_plot_cost(plot, fsr);
 
             char buffer[256]; 
             sprintf(buffer, "Cost: %g", plot.count > 0 ? plot.items[plot.count - 1] : 0);
-            DrawText(buffer, r.x+r.w*2/5, 50, r.h*0.04f, RAYWHITE);
+            DrawText(buffer, fsr.x+fsr.w + 100, fsr.y+fsr.h-40, fsr.h*0.05f, RAYWHITE);
 
-            //sprintf(buffer, "Epochs: %zu/%zu, Rate: %f", epoch, max_epoch, rate);
-            //DrawText(buffer, cpr.x+cpr.w/8+20, cpr.y+cpr.h*1.025, cpr.h*0.04f, RAYWHITE);
+            sprintf(buffer, "Epochs: %zu/%zu, Rate: %f", epoch, max_epoch, rate);
+            DrawText(buffer, fsr.x+fsr.w + 50, 20, fsr.h*0.04f, RAYWHITE);
 
-            //{
-            //    float pad = cpr.h*0.05f;
-            //    Vector2 position = { cpr.x+cpr.w*0.2f, cpr.y + cpr.h*1.05 + pad, };
-            //    Vector2 size = { preview_width*scale*2, cpr.h*0.008f, };
-            //    float knob_radious = cpr.h*0.02f;
-            //    DrawRectangleV(position, size, RAYWHITE);
-            //    Vector2 knob_position = {position.x + size.x*rate, position.y + size.y*0.5f}; 
-            //    DrawCircleV(knob_position, knob_radious, RED);
-
-            //    if (lrate_scroll_dragging) {
-            //        float x = GetMousePosition().x;
-            //        if (x < position.x) { x = position.x; }
-            //        if (x > position.x + size.x) { x = position.x + size.x; }
-            //        rate = (x - position.x)/size.x;
-            //    }
-
-            //    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            //        Vector2 mouse_position = GetMousePosition();
-            //        if (CheckCollisionPointCircle(mouse_position, knob_position, knob_radious)) {
-            //            lrate_scroll_dragging = true;
-            //        }
-            //    }
-
-            //    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            //        lrate_scroll_dragging = false;
-            //    }
-
-            //}
-
-            //cpr.x += cpr.w;
+            nf_v_slider(&rate, &lrate_scroll_dragging, fsr.x, fsr.y, fsr.w, 20);
             nf_v_nn_render(nn, nf_v_layout_slot());
+            nf_v_layout_end();
 
-            //cpr.x += cpr.w;
+            NF_V_Rect isr = nf_v_layout_slot();
 
             // Draw original image 1 
             //DrawTextureEx(original_texture1,CLITERAL(Vector2){cpr.x, cpr.y-50}, 0, scale, WHITE);
