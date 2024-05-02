@@ -1,3 +1,8 @@
+
+# DISCLAMER
+* I am ashamed of how I tried to mimic of learning ML by having multiple "session" folders
+* I see the errors of my way
+
 # Machine Learning 
 
 ```
