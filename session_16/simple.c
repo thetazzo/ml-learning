@@ -6,7 +6,8 @@
 
 int main() {
     size_t arch[] = {2, 3, 4, 10, 12, 18, 10, 10, 2};
-    NF_NN nn = nf_nn_alloc(arch, NF_ARRAY_LEN(arch));
+    Region temp = region_alloc_alloc(256*1024*1024);
+    NF_NN nn = nf_nn_alloc(NULL, arch, NF_ARRAY_LEN(arch));
     nf_nn_rand(nn, -1, 1);
     NF_NN_PRINT(nn);
 

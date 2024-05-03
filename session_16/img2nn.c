@@ -49,9 +49,12 @@ void nf_v_preview_image(NF_NN nn, NF_V_Rect r, float scale, float pimg_index)
 // neural network architecture
 //size_t arch[] = {3, 28, 16, 15, 14, 13, 12, 10, 6, 12, 7, 4, 3, 1};
 size_t arch[] = {3, 11, 18, 9, 4, 1};
+bool isRunning = false;
 
 int main(int argc, char **argv)
 {
+    Region temp = region_alloc_alloc(256*1024*1024);
+
     char *program = p2m_shift_args(&argc, &argv);
     if (argc <= 0) {
         fprintf(stderr, "ERROR: no image 1 provided\n");
@@ -95,10 +98,10 @@ int main(int argc, char **argv)
 
     printf("%s size %dx%d %d bits\n", img2_file_path, img2_width, img2_height, img2_comp*8);
 
-    NF_NN nn = nf_nn_alloc(arch, NF_ARRAY_LEN(arch));
-    NF_NN gn = nf_nn_alloc(arch, NF_ARRAY_LEN(arch));
+    NF_NN nn = nf_nn_alloc(NULL, arch, NF_ARRAY_LEN(arch));
 
     NF_Mat td = nf_mat_alloc(
+        NULL,
         img1_width*img1_height + img2_width*img2_height,
         NF_NN_INPUT(nn).cols + NF_NN_OUTPUT(nn).cols
     );
@@ -184,12 +187,9 @@ int main(int argc, char **argv)
     size_t max_epoch = 50*1000;
     size_t epoch = 0;
     size_t bpf = 200;  // batches per frame
+    Batch batch = {0};
     size_t batch_size = 28;
-    size_t batch_count = (td.rows + batch_size-1)/batch_size;
-    size_t batch_begin = 0;
-    float cost = 0.f;
     float rate = 1.f;
-    bool isRunning = false;
     float preview_scroll = 0.5f;
     bool preview_scroll_dragging = false;
     bool lrate_scroll_dragging = false;
@@ -219,37 +219,10 @@ int main(int argc, char **argv)
         }
 
         for (size_t i = 0; i < bpf && epoch < max_epoch && isRunning; ++i) {
-            size_t size = batch_size;
-
-            if (batch_begin + batch_size >= td.rows) {
-                // handle last batch that is not the full batch size
-                size = td.rows - batch_begin;
-            }
-
-            NF_Mat batch_ti = {
-                .rows = size,
-                .cols = 3,
-                .stride = td.stride,
-                .es = &NF_MAT_AT(td, batch_begin, 0),
-            };
-
-            NF_Mat batch_to = {
-                .rows = size, 
-                .cols = 1,
-                .stride = td.stride,
-                .es = &NF_MAT_AT(td, batch_begin, batch_ti.cols),
-            };
-
-            nf_nn_backprop(nn, gn, batch_ti, batch_to);
-            nf_nn_learn(nn, gn, rate);
-            cost += nf_nn_cost(nn, batch_ti, batch_to);
-            batch_begin += batch_size;
-
-            if (batch_begin >= td.rows) {
+            nf_batch_process(&temp, &batch, batch_size, nn, td, rate);
+            if (batch.done) {
                 epoch += 1;
-                da_append(&plot, cost/batch_count);
-                cost = 0.0f;
-                batch_begin = 0;
+                da_append(&plot, batch.cost);
                 nf_mat_shuffle_rows(td);
             }
         }  
@@ -269,7 +242,7 @@ int main(int argc, char **argv)
             sprintf(buffer, "Cost: %g", plot.count > 0 ? plot.items[plot.count - 1] : 0);
             DrawText(buffer, fsr.x+fsr.w + 100, fsr.y+fsr.h-40, fsr.h*0.05f, RAYWHITE);
 
-            sprintf(buffer, "Epochs: %zu/%zu, Rate: %f", epoch, max_epoch, rate);
+            sprintf(buffer, "Epochs: %zu/%zu, Rate: %f, Mem Usage: %zu\n", epoch, max_epoch, rate, temp.size);
             DrawText(buffer, fsr.x+fsr.w + 50, 20, fsr.h*0.03f, RAYWHITE);
 
             nf_v_slider(&rate, &lrate_scroll_dragging, fsr.x + fsr.w*2 + 50, fsr.y - 80, fsr.w, 20);
@@ -304,6 +277,7 @@ int main(int argc, char **argv)
             nf_v_layout_end();
         }
         EndDrawing();
+        region_reset(&temp);
     }
     CloseWindow();
 

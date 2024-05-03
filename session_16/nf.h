@@ -11,7 +11,7 @@
 #define NF_BACKPROP_TRADITIONAL
 // TODO: reafacor this to be part of the NF_NN typedef
 #ifndef NF_NN_ACT
-#define NF_NN_ACT NF_ACT_LRELU
+#define NF_NN_ACT NF_ACT_TANH
 #endif //NF_NN_ACT
 
 #ifndef NF_MALLOC
@@ -45,6 +45,19 @@ float nf_lreluf(float x);
 float nf_tanhf(float x);
 float nf_gelu(float x);
 
+// --------------------------------------------------------------------
+//          Arena Allocator ~ Region Based Memory Management
+// --------------------------------------------------------------------
+typedef struct {
+    size_t capacity;
+    size_t size;
+    char *data;
+} Region;
+
+Region region_alloc_alloc(size_t capacity);
+void *region_alloc(Region *r, size_t size);
+#define region_reset(r) (r)->size = 0
+
 // ---------------------------------------
 //   Declatrations For Matrix Operations
 // ---------------------------------------
@@ -57,11 +70,10 @@ typedef struct {
 } NF_Mat;
 
 #define NF_MAT_AT(m, i, j) (m).es[(i)*(m).stride + (j)]
-
 // Allocate memory for a matrix
-NF_Mat nf_mat_alloc(size_t rows, size_t cols);
+NF_Mat nf_mat_alloc(Region *r, size_t rows, size_t cols);
 void nf_mat_save(FILE *out, NF_Mat m);
-NF_Mat nf_mat_load(FILE *in);
+NF_Mat nf_mat_load(Region *r, FILE *in);
 void nf_mat_rand(NF_Mat m, float low, float high);
 void nf_mat_fill(NF_Mat m, float a);
 NF_Mat nf_mat_row(NF_Mat m, size_t row);
@@ -80,26 +92,38 @@ void nf_mat_act(NF_Mat m);
 // ------------------------------------------------
 
 typedef struct {
-    size_t count;
-
-    NF_Mat *ws;
-    NF_Mat *bs;
-    NF_Mat *as; // amount of total activations is count+1 because we also have a0 ~ input
+    size_t *arch;
+    size_t arch_count; 
+    NF_Mat *ws; // amount of total weights is arch_count-1 
+    NF_Mat *bs; // amount of total biases is arch_count-1 
+    
+    // TODO: maybe remove this? It might be better to allocate the activations in a
+    // temporary memory region during the forwarding
+    NF_Mat *as; 
 } NF_NN;
 
-#define NF_NN_INPUT(nn) (nn).as[0]
-#define NF_NN_OUTPUT(nn) (nn).as[(nn).count]
+#define NF_NN_INPUT(nn) (NF_ASSERT((nn).arch_count > 0), (nn).as[0])
+#define NF_NN_OUTPUT(nn) (NF_ASSERT((nn).arch_count > 0), (nn).as[(nn).arch_count-1])
 
-NF_NN nf_nn_alloc(size_t *arch, size_t arch_count);
+NF_NN nf_nn_alloc(Region *r, size_t *arch, size_t arch_count);
 void nf_nn_fill(NF_NN nn, float a);
 void nf_nn_print(NF_NN nn, const char *name);
 #define NF_NN_PRINT(nn) nf_nn_print((nn), #nn) 
 void nf_nn_rand(NF_NN nn, float low, float high);
 void nf_nn_forward(NF_NN nn);
 float nf_nn_cost(NF_NN nn, NF_Mat ti, NF_Mat to);
+// TODO: refactor nf_nn_finite_diff to return NF_NN like backprop
 void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to);
-void nf_nn_backprop(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to);
+NF_NN nf_nn_backprop(Region *r, NF_NN nn, NF_Mat ti, NF_Mat to);
 void nf_nn_learn(NF_NN nn, NF_NN gn, float rate);
+
+typedef struct {
+    size_t begin;
+    float cost;
+    bool done;
+} Batch;
+
+void nf_batch_process(Region *r, Batch *b, size_t batch_size, NF_NN nn, NF_Mat td, float rate);
 
 #ifdef NF_VISUALISATION
 #include <math.h>
@@ -244,13 +268,13 @@ float nf_gelu(float x)
  * -------------------------------------
  */
 
-NF_Mat nf_mat_alloc(size_t rows, size_t cols)
+NF_Mat nf_mat_alloc(Region *r, size_t rows, size_t cols)
 {
     NF_Mat m = {0}; 
     m.rows = rows;
     m.cols = cols;
     m.stride = cols;
-    m.es = (float*) NF_MALLOC(sizeof(*m.es) * rows * cols);
+    m.es = region_alloc(r, sizeof(*m.es) * rows * cols);
     NF_ASSERT(m.es != NULL);
     return m;
 }
@@ -270,7 +294,7 @@ void nf_mat_save(FILE *out, NF_Mat m)
     }
 }
 
-NF_Mat nf_mat_load(FILE *in)
+NF_Mat nf_mat_load(Region *r, FILE *in)
 {
     uint64_t magic;
     fread(&magic, sizeof(magic), 1, in);
@@ -278,7 +302,7 @@ NF_Mat nf_mat_load(FILE *in)
     size_t rows, cols;
     fread(&rows, sizeof(rows), 1, in);
     fread(&cols, sizeof(cols), 1, in);
-    NF_Mat m = nf_mat_alloc(rows, cols);
+    NF_Mat m = nf_mat_alloc(r, rows, cols);
     
     size_t n = fread(m.es, sizeof(*m.es), rows*cols, in);
     while (n < rows*cols && !ferror(in)) {
@@ -417,25 +441,26 @@ void nf_mat_act(NF_Mat m)
 //              Neural Network Implementations 
 // ------------------------------------------------
 
-NF_NN nf_nn_alloc(size_t *arch, size_t arch_count)
+NF_NN nf_nn_alloc(Region *r, size_t *arch, size_t arch_count)
 {
     NF_ASSERT(arch_count > 0);
 
     NF_NN nn;
-    nn.count = arch_count - 1;
+    nn.arch = arch;
+    nn.arch_count = arch_count;
 
-    nn.ws = (NF_Mat*) NF_MALLOC(sizeof(*nn.ws)*nn.count);
+    nn.ws = region_alloc(r, sizeof(*nn.ws)*nn.arch_count - 1);
     NF_ASSERT(nn.ws != NULL);
-    nn.bs = (NF_Mat*) NF_MALLOC(sizeof(*nn.bs)*nn.count);
+    nn.bs = region_alloc(r, sizeof(*nn.bs)*nn.arch_count - 1);
     NF_ASSERT(nn.bs != NULL);
-    nn.as = (NF_Mat*) NF_MALLOC(sizeof(*nn.as)*(nn.count + 1));
+    nn.as = region_alloc(r, sizeof(*nn.as)*(nn.arch_count));
     NF_ASSERT(nn.as != NULL);
 
-    nn.as[0] = nf_mat_alloc(1, arch[0]);
+    nn.as[0] = nf_mat_alloc(r, 1, arch[0]);
     for (size_t i = 1; i < arch_count;++i) {
-        nn.ws[i - 1] = nf_mat_alloc(nn.as[i-1].cols, arch[i]);
-        nn.bs[i - 1] = nf_mat_alloc(1, arch[i]);
-        nn.as[i]     = nf_mat_alloc(1, arch[i]);
+        nn.ws[i - 1] = nf_mat_alloc(r, nn.as[i-1].cols, arch[i]);
+        nn.bs[i - 1] = nf_mat_alloc(r, 1, arch[i]);
+        nn.as[i]     = nf_mat_alloc(r, 1, arch[i]);
     }
 
     return nn;
@@ -443,12 +468,12 @@ NF_NN nf_nn_alloc(size_t *arch, size_t arch_count)
 
 void nf_nn_fill(NF_NN nn, float a)
 {
-    for (size_t l = 0; l < nn.count; ++l) {
+    for (size_t l = 0; l < nn.arch_count - 1; ++l) {
         nf_mat_fill(nn.ws[l], a);
         nf_mat_fill(nn.bs[l], a);
         nf_mat_fill(nn.as[l], a);
     }
-    nf_mat_fill(nn.as[nn.count], a);
+    nf_mat_fill(nn.as[nn.arch_count - 1], a);
 }
 
 void nf_nn_print(NF_NN nn, const char *name)
@@ -459,7 +484,7 @@ void nf_nn_print(NF_NN nn, const char *name)
     NF_Mat *ws = nn.ws;
     NF_Mat *bs = nn.bs;
 
-    for (size_t i = 0; i < nn.count; ++i) {
+    for (size_t i = 0; i < nn.arch_count-1; ++i) {
         snprintf(buf, sizeof(buf), "ws%zu", i);
         nf_mat_print(ws[i], buf, 3);
         snprintf(buf, sizeof(buf), "bs%zu", i);
@@ -471,7 +496,7 @@ void nf_nn_print(NF_NN nn, const char *name)
 
 void nf_nn_rand(NF_NN nn, float low, float high)
 {
-    for (size_t i = 0; i < nn.count; ++i) {
+    for (size_t i = 0; i < nn.arch_count-1; ++i) {
         nf_mat_rand(nn.ws[i], low, high);
         nf_mat_rand(nn.bs[i], low, high);
     }
@@ -479,7 +504,7 @@ void nf_nn_rand(NF_NN nn, float low, float high)
 
 void nf_nn_forward(NF_NN nn)
 {
-    for (size_t i = 0; i < nn.count; ++i) {
+    for (size_t i = 0; i < nn.arch_count-1; ++i) {
         nf_mat_dot(nn.as[i+1], nn.as[i], nn.ws[i]);
         nf_mat_sum(nn.as[i+1], nn.bs[i]);
         nf_mat_act(nn.as[i+1]);
@@ -516,7 +541,7 @@ void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to)
     float saved;
     float c = nf_nn_cost(nn, ti, to);
 
-    for (size_t i = 0; i < nn.count; ++i) {
+    for (size_t i = 0; i < nn.arch_count-1; ++i) {
         for (size_t j = 0; j < nn.ws[i].rows; ++j) {
             for (size_t k = 0; k < nn.ws[i].cols; ++k) {
                 saved = NF_MAT_AT(nn.ws[i], j, k);
@@ -537,11 +562,13 @@ void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to)
     }
 }
 
-void nf_nn_backprop(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
+NF_NN nf_nn_backprop(Region *r, NF_NN nn, NF_Mat ti, NF_Mat to)
 {
     NF_ASSERT(ti.rows == to.rows);
-    NF_ASSERT(NF_NN_OUTPUT(nn).cols == to.cols);
     size_t n = ti.rows;
+    NF_ASSERT(NF_NN_OUTPUT(nn).cols == to.cols);
+
+    NF_NN gn = nf_nn_alloc(r, nn.arch, nn.arch_count);
     nf_nn_fill(gn, 0);                                                          // clear the gradient network
     
     // Feed-Forward With Back-Propagation
@@ -554,8 +581,8 @@ void nf_nn_backprop(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
         nf_mat_copy(NF_NN_INPUT(nn), nf_mat_row(ti, i));
         nf_nn_forward(nn);
 
-        // clean up activations of the gradient network
-        for (size_t l = 0; l <= gn.count; ++l) {
+        // cclean up activations of the gradient network
+        for (size_t l = 0; l < nn.arch_count; ++l) {
             nf_mat_fill(gn.as[l], 0);
         }
         
@@ -583,7 +610,7 @@ void nf_nn_backprop(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
         //   - l points to the layer after the current one
         //   - the last layer is the output layer 
         // --------------------------------------------------------------------------------------------------------------------------------------
-        for (size_t l = nn.count; l > 0; --l) {
+        for (size_t l = nn.arch_count-1; l > 0; --l) {
             // current activation - j
             for (size_t j = 0; j < nn.as[l].cols; ++j) {
                 // j-th activation of the l-th layer
@@ -629,7 +656,7 @@ void nf_nn_backprop(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
     }
     
     // normalizse the gradint aka do the 1/n part
-    for (size_t l = 0; l < gn.count; ++l) {
+    for (size_t l = 0; l < gn.arch_count-1; ++l) {
         for (size_t i = 0; i < gn.ws[l].rows; ++i) {
             for (size_t j = 0; j < gn.ws[l].cols; ++j) {
                 NF_MAT_AT(gn.ws[l], i, j) /= n;
@@ -641,11 +668,13 @@ void nf_nn_backprop(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to)
             }
         }
     }
+
+    return gn;
 }
 
 void nf_nn_learn(NF_NN nn, NF_NN gn, float rate)
 {
-    for (size_t i = 0; i < nn.count; ++i) {
+    for (size_t i = 0; i < nn.arch_count-1; ++i) {
         for (size_t j = 0; j < nn.ws[i].rows; ++j) {
             for (size_t k = 0; k < nn.ws[i].cols; ++k) {
                 NF_MAT_AT(nn.ws[i], j, k) -= rate*NF_MAT_AT(gn.ws[i], j, k);
@@ -657,6 +686,44 @@ void nf_nn_learn(NF_NN nn, NF_NN gn, float rate)
                 NF_MAT_AT(nn.bs[i], j, k) -= rate*NF_MAT_AT(gn.bs[i], j, k);
             }
         }
+    }
+}
+
+void nf_batch_process(Region *r, Batch *b, size_t batch_size, NF_NN nn, NF_Mat td, float rate)
+{
+    if (b->done) {
+        b->done = false;
+        b->begin = 0;
+        b->cost = 0;
+    }
+
+    size_t size = batch_size;
+    if (b->begin + batch_size >= td.rows) {
+        size = td.rows - b->begin;
+    }
+
+    NF_Mat batch_ti = {
+        .rows = size,
+        .cols = NF_NN_INPUT(nn).cols,
+        .stride = td.stride,
+        .es = &NF_MAT_AT(td, b->begin, 0),
+    };
+    NF_Mat batch_to = {
+        .rows = size,
+        .cols = NF_NN_OUTPUT(nn).cols,
+        .stride = td.stride,
+        .es = &NF_MAT_AT(td, b->begin, batch_ti.cols),
+    };
+
+    NF_NN gn = nf_nn_backprop(r, nn, batch_ti, batch_to);
+    nf_nn_learn(nn, gn, rate);
+    b->cost += nf_nn_cost(nn, batch_ti, batch_to);
+    b->begin += batch_size;
+
+    if (b->begin >= td.rows) {
+        size_t batch_count = (td.rows + batch_size - 1) / batch_size;
+        b->cost /= batch_count;
+        b->done = true;
     }
 }
 
@@ -735,20 +802,18 @@ void nf_v_render_nn(NF_NN nn, NF_V_Rect r) {
     float layer_border_hpad = 50;
     float layer_border_vpad = 50;
 
-    size_t arch_count = nn.count + 1;
-
     float nn_width   = r.w - 2*layer_border_hpad;
     float nn_height  = r.h - 2*layer_border_vpad;
     float nn_x       = r.x + r.w/2 - nn_width/2;
     float nn_y       = r.y + r.h/2 - nn_height/2;
 
-    int layer_hpad = nn_width / arch_count;
-    for (size_t l = 0; l < arch_count; ++l) {
+    int layer_hpad = nn_width / nn.arch_count;
+    for (size_t l = 0; l < nn.arch_count; ++l) {
         int layer_vpad1 = nn_height/nn.as[l].cols;
         for (size_t i = 0; i < nn.as[l].cols; ++i) {
             float cx1 = nn_x + l*layer_hpad + layer_hpad/2; 
             float cy1 = nn_y + i*layer_vpad1 + layer_vpad1/2;
-            if (l+1 < arch_count) {
+            if (l+1 < nn.arch_count) {
                 float layer_vpad2 = nn_height/nn.as[l+1].cols;
                 for (size_t j = 0; j < nn.as[l+1].cols; ++j) {
                     float cx2 = nn_x + (l+1)*layer_hpad + layer_hpad/2; 
@@ -846,8 +911,8 @@ void nf_v_slider(float *value, bool *is_dragging, float rx, float ry, float rw, 
 
 void nf_v_render_mat_as_heatmap(NF_Mat m, NF_V_Rect r, size_t max_width)
 {
-    Color low_color  = { 0xFF, 0x00, 0xFF, 0xFF };
-    Color high_color = { 0x00, 0xFF, 0x00, 0xFF };
+    Color low_color  = { 0x00, 0x00, 0xFF, 0xFF };
+    Color high_color = { 0xFF, 0x00, 0x00, 0xFF };
 
     float cell_width  = r.w*m.cols/max_width/m.cols;
     float cell_height = r.h/m.rows;
@@ -875,14 +940,14 @@ void nf_v_render_mat_as_heatmap(NF_Mat m, NF_V_Rect r, size_t max_width)
 void nf_v_render_nn_weights_heatmap(NF_NN nn, NF_V_Rect r)
 {
     size_t max_width = 0;
-    for (size_t i = 0; i < nn.count; ++i) {
+    for (size_t i = 0; i < nn.arch_count-1; ++i) {
         if (max_width < nn.ws[i].cols) {
             max_width = nn.ws[i].cols;
         }
     }
-    nf_v_layout_begin(VLO_VERT, r, nn.count, 10);
-    for (size_t i = 0; i < nn.count + 1; ++i) {
-        nf_v_render_mat_ws_heatmap(nn.ws[i], nf_v_layout_slot(), max_width);
+    nf_v_layout_begin(VLO_VERT, r, nn.arch_count-1, 10);
+    for (size_t i = 0; i < nn.arch_count; ++i) {
+        nf_v_render_mat_as_heatmap(nn.ws[i], nf_v_layout_slot(), max_width);
     }
     nf_v_layout_end();
 }
@@ -890,13 +955,13 @@ void nf_v_render_nn_weights_heatmap(NF_NN nn, NF_V_Rect r)
 void nf_v_render_nn_activations_heatmap(NF_NN nn, NF_V_Rect r)
 {
     size_t max_width = 0;
-    for (size_t i = 0; i < nn.count + 1; ++i) {
+    for (size_t i = 0; i < nn.arch_count; ++i) {
         if (max_width < nn.as[i].cols) {
             max_width = nn.as[i].cols;
         }
     }
-    nf_v_layout_begin(VLO_VERT, r, nn.count + 1, 10);
-    for (size_t i = 0; i < nn.count + 1; ++i) {
+    nf_v_layout_begin(VLO_VERT, r, nn.arch_count, 10);
+    for (size_t i = 0; i < nn.arch_count; ++i) {
         nf_v_render_mat_as_heatmap(nn.as[i], nf_v_layout_slot(), max_width);
     }
     nf_v_layout_end();
@@ -1032,5 +1097,32 @@ int nf_v_render_upscaled_video(NF_NN nn, float duration, const char *out_file_pa
 }
 #endif // NF_IMAGE_GENERATION
 #endif // NF_VISUALISATION
+
+Region region_alloc_alloc(size_t capacity)
+{
+    void *data = NF_MALLOC(capacity);
+    NF_ASSERT(data != NULL);
+    Region r = {
+        .capacity = capacity,
+        .data = data,
+        .size = 0,
+    };
+    return r;
+}
+
+void *region_alloc(Region *r, size_t size)
+{
+    if (r == NULL) {
+        return NF_MALLOC(size);
+    }
+
+    NF_ASSERT(r->size + size <= r->capacity);
+    if (r->size + size > r->capacity) {
+        return NULL;
+    }
+    void *result = &r->data[r->size];
+    r->size += size;
+    return result;
+}
 
 #endif // NF_IMPLEMENTATION
