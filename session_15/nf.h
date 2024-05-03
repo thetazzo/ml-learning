@@ -174,16 +174,18 @@ typedef struct {
 
 void nf_v_widget(NF_V_Rect r);
 
-void nf_v_nn_render(NF_NN nn, NF_V_Rect r);
+void nf_v_render_nn(NF_NN nn, NF_V_Rect r);
 void nf_v_plot_cost(NF_V_Plot plot, NF_V_Rect);
 void nf_v_slider(float *value, bool *is_dragging, float rx, float ry, float rw, float rh);
 
-void nf_v_render_single_frame(NF_NN nn, float img_index);
+void nf_v_render_mat_as_cake(NF_V_Rect r, NF_Mat m);
+void nf_v_render_nn_as_cake(NF_NN nn, NF_V_Rect r);
 
 #ifdef NF_IMAGE_GENERATION
 #include "stb_image.h"
 #include "stb_image_write.h"
 
+void nf_v_render_single_frame(NF_NN nn, float img_index);
 int  nf_v_render_upscaled_screenshot(NF_NN nn, float img_index, const char *out_file_path);
 int  nf_v_render_upscaled_video(NF_NN nn, float duration, const char *out_file_path);
 #endif //NF_IMAGE_GENERATION
@@ -727,7 +729,7 @@ void nf_v_layout_stack_push(NF_V_Layout_Stack *ls, NF_V_Layout_Orient orient, NF
     da_append(ls, l);
 }
 
-void nf_v_nn_render(NF_NN nn, NF_V_Rect r) {
+void nf_v_render_nn(NF_NN nn, NF_V_Rect r) {
     Color low_color  = { 0xFF, 0x00, 0xFF, 0xFF };
     Color high_color = { 0x00, 0xFF, 0x00, 0xFF };
 
@@ -844,6 +846,41 @@ void nf_v_slider(float *value, bool *is_dragging, float rx, float ry, float rw, 
     }
 }
 
+void nf_v_render_mat_as_cake(NF_V_Rect r, NF_Mat m)
+{
+    Color low_color  = { 0xFF, 0x00, 0xFF, 0xFF };
+    Color high_color = { 0x00, 0xFF, 0x00, 0xFF };
+
+    float cell_width  = r.w/m.cols;
+    float cell_height = r.h/m.rows;
+
+    float gap = 5;
+
+    nf_v_layout_begin(VLO_VERT, r, m.rows, gap);
+    for (size_t y = 0; y < m.rows; ++y) {
+        nf_v_layout_begin(VLO_HORZ, nf_v_layout_slot(), m.cols, gap);
+        for (size_t x = 0; x < m.cols; ++x) {
+            float alpha = nf_sigmoidf(NF_MAT_AT(m, y, x));
+            high_color.a = floorf(255.f*alpha);
+            Color clr = ColorAlphaBlend(low_color, high_color, WHITE);
+            NF_V_Rect slot = nf_v_layout_slot();
+            DrawRectangle(slot.x, slot.y, slot.w, slot.h, clr);
+        }
+        nf_v_layout_end();
+    }
+    nf_v_layout_end();
+}
+
+void nf_v_render_nn_as_cake(NF_NN nn, NF_V_Rect r)
+{
+    nf_v_layout_begin(VLO_VERT, r, nn.count, 10);
+    for (size_t i = 0; i < nn.count; ++i) {
+        nf_v_render_mat_as_cake(nf_v_layout_slot(), nn.ws[i]);
+    }
+    nf_v_layout_end();
+}
+
+#ifdef NF_IMAGE_GENERATION
 // TODO: remove
 #define STR2(x) #x
 #define STR(x) STR2(x)
@@ -874,7 +911,6 @@ void nf_v_render_single_frame(NF_NN nn, float img_index)
     }
 }
 
-#ifdef NF_IMAGE_GENERATION
 int nf_v_render_upscaled_screenshot(NF_NN nn, float img_index, const char *out_file_path)
 {
     assert(out_pixles != NULL);

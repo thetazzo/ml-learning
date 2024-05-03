@@ -259,7 +259,7 @@ int main(int argc, char **argv)
             int w = GetRenderWidth();
             int h = GetRenderHeight();
             float scale = h*0.009f;
-            float frame = h*0.03;
+            float frame = h*0.08;
 
             nf_v_layout_begin(VLO_HORZ, (CLITERAL(NF_V_Rect){frame,frame,w-2*frame,h-2*frame}), 3, 0);
             NF_V_Rect fsr = nf_v_layout_slot();
@@ -273,11 +273,17 @@ int main(int argc, char **argv)
             DrawText(buffer, fsr.x+fsr.w + 50, 20, fsr.h*0.03f, RAYWHITE);
 
             nf_v_slider(&rate, &lrate_scroll_dragging, fsr.x, fsr.y, fsr.w, 20);
-            nf_v_nn_render(nn, nf_v_layout_slot());
+            //nf_v_nn_render(nn, nf_v_layout_slot());
+            NF_V_Rect nnr = nf_v_layout_slot();
+            nnr.h -= 70;
+            nnr.y += 30;
+            nnr.w -= 70;
+            nnr.x += 30;
+            nf_v_render_nn_as_cake(nn, nnr);
 
             NF_V_Rect isr = nf_v_layout_slot();
             isr.x += isr.w/12;
-            isr.y += isr.h/12;
+            //isr.y += isr.h/12;
             // Draw original image 1 
             DrawTextureEx(original_texture1,CLITERAL(Vector2){isr.x, isr.y}, 0, scale, WHITE);
             // Draw original image 2 

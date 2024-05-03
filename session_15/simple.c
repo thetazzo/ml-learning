@@ -5,7 +5,7 @@
 #include "nf.h"
 
 int main() {
-    size_t arch[] = {2, 3, 4, 2};
+    size_t arch[] = {2, 3, 4, 10, 12, 18, 10, 10, 2};
     NF_NN nn = nf_nn_alloc(arch, NF_ARRAY_LEN(arch));
     nf_nn_rand(nn, -1, 1);
     NF_NN_PRINT(nn);
@@ -18,7 +18,10 @@ int main() {
     while(!WindowShouldClose()) {
         BeginDrawing();
             ClearBackground(BLACK);
-            nf_v_nn_render(nn, CLITERAL(NF_V_Rect){0, 0, w, h});
+            nf_v_layout_begin(VLO_HORZ, (CLITERAL(NF_V_Rect){0, 0, w, h}), 2, 0);
+                nf_v_render_nn(nn, nf_v_layout_slot());
+                nf_v_render_nn_as_cake(nn, nf_v_layout_slot());
+            nf_v_layout_end();
         EndDrawing();
     }
 
