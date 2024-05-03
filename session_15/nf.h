@@ -854,7 +854,7 @@ void nf_v_render_mat_as_cake(NF_V_Rect r, NF_Mat m)
     float cell_width  = r.w/m.cols;
     float cell_height = r.h/m.rows;
 
-    float gap = 5;
+    float gap = 0;
 
     nf_v_layout_begin(VLO_VERT, r, m.rows, gap);
     for (size_t y = 0; y < m.rows; ++y) {
