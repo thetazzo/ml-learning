@@ -242,7 +242,7 @@ int main(int argc, char **argv)
             sprintf(buffer, "Cost: %g", plot.count > 0 ? plot.items[plot.count - 1] : 0);
             DrawText(buffer, fsr.x+fsr.w + 100, fsr.y+fsr.h-40, fsr.h*0.05f, RAYWHITE);
 
-            sprintf(buffer, "Epochs: %zu/%zu, Rate: %f, Mem Usage: %zu\n", epoch, max_epoch, rate, temp.size);
+            sprintf(buffer, "Epochs: %zu/%zu, Rate: %f, Mem Usage: %d\n", epoch, max_epoch, rate, region_occupied_bytes(&temp));
             DrawText(buffer, fsr.x+fsr.w + 50, 20, fsr.h*0.03f, RAYWHITE);
 
             nf_v_slider(&rate, &lrate_scroll_dragging, fsr.x + fsr.w*2 + 50, fsr.y - 80, fsr.w, 20);

@@ -49,14 +49,16 @@ float nf_gelu(float x);
 //          Arena Allocator ~ Region Based Memory Management
 // --------------------------------------------------------------------
 typedef struct {
-    size_t capacity;
-    size_t size;
-    char *data;
+    size_t capacity_;
+    size_t size_;
+    uintptr_t *words;
 } Region;
 
+// capacity is in bytes but it can allocate more just to keep words(data) alligned
 Region region_alloc_alloc(size_t capacity);
 void *region_alloc(Region *r, size_t size);
-#define region_reset(r) (r)->size = 0
+#define region_reset(r) if (r) (r)->size_ = 0
+#define region_occupied_bytes(r) (NF_ASSERT((r) != NULL) , (r)->size_*sizeof(*(r)->words))
 
 // ---------------------------------------
 //   Declatrations For Matrix Operations
@@ -112,8 +114,7 @@ void nf_nn_print(NF_NN nn, const char *name);
 void nf_nn_rand(NF_NN nn, float low, float high);
 void nf_nn_forward(NF_NN nn);
 float nf_nn_cost(NF_NN nn, NF_Mat ti, NF_Mat to);
-// TODO: refactor nf_nn_finite_diff to return NF_NN like backprop
-void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to);
+NF_NN nf_nn_finite_diff(Region *r, NF_NN nn, NF_Mat ti, NF_Mat to, float eps);
 NF_NN nf_nn_backprop(Region *r, NF_NN nn, NF_Mat ti, NF_Mat to);
 void nf_nn_learn(NF_NN nn, NF_NN gn, float rate);
 
@@ -536,10 +537,11 @@ float nf_nn_cost(NF_NN nn, NF_Mat ti, NF_Mat to)
     return c/n;
 }
 
-void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to)
+NF_NN nf_nn_finite_diff(Region *r, NF_NN nn, NF_Mat ti, NF_Mat to, float eps)
 {
     float saved;
     float c = nf_nn_cost(nn, ti, to);
+    NF_NN gn = nf_nn_alloc(r, nn.arch, nn.arch_count);
 
     for (size_t i = 0; i < nn.arch_count-1; ++i) {
         for (size_t j = 0; j < nn.ws[i].rows; ++j) {
@@ -560,6 +562,7 @@ void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to)
             }
         }
     }
+    return gn;
 }
 
 NF_NN nf_nn_backprop(Region *r, NF_NN nn, NF_Mat ti, NF_Mat to)
@@ -795,8 +798,8 @@ void nf_v_layout_stack_push(NF_V_Layout_Stack *ls, NF_V_Layout_Orient orient, NF
 }
 
 void nf_v_render_nn(NF_NN nn, NF_V_Rect r) {
-    Color low_color  = { 0xFF, 0x00, 0xFF, 0xFF };
-    Color high_color = { 0x00, 0xFF, 0x00, 0xFF };
+    Color low_color  = { 0x00, 0x00, 0xFF, 0xFF };
+    Color high_color = { 0xFF, 0x00, 0x00, 0xFF };
 
     float neuron_rad = r.h*0.03;
     float layer_border_hpad = 50;
@@ -1100,13 +1103,13 @@ int nf_v_render_upscaled_video(NF_NN nn, float duration, const char *out_file_pa
 
 Region region_alloc_alloc(size_t capacity)
 {
-    void *data = NF_MALLOC(capacity);
-    NF_ASSERT(data != NULL);
-    Region r = {
-        .capacity = capacity,
-        .data = data,
-        .size = 0,
-    };
+    Region r = {0};
+    size_t word_size = sizeof(*r.words);
+    size_t words_capacity = (capacity + word_size - 1)/word_size;
+    void *words = NF_MALLOC(words_capacity*word_size);
+    NF_ASSERT(words != NULL);
+    r.capacity_ = capacity,
+    r.words = words;
     return r;
 }
 
@@ -1116,12 +1119,14 @@ void *region_alloc(Region *r, size_t size)
         return NF_MALLOC(size);
     }
 
-    NF_ASSERT(r->size + size <= r->capacity);
-    if (r->size + size > r->capacity) {
+    size_t word_size = sizeof(*r->words);
+    size_t words_size = (size + word_size - 1)/word_size;
+    NF_ASSERT(r->size_ + words_size <= r->capacity_);
+    if (r->size_ + words_size > r->capacity_) {
         return NULL;
     }
-    void *result = &r->data[r->size];
-    r->size += size;
+    void *result = &r->words[r->size_];
+    r->size_ += words_size;
     return result;
 }
 
