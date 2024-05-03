@@ -66,6 +66,6 @@ raylib_clang() {
 # raylib_clang ./session_14/layout layout
 
 # Session 15
-# raylib_clang ./session_15/layout layout
+raylib_clang ./session_15/layout layout
 raylib_clang ./session_15/simple simple
 raylib_clang ./session_15/img2nn img2nn

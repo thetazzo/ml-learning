@@ -47,7 +47,7 @@ void nf_v_preview_image(NF_NN nn, NF_V_Rect r, float scale, float pimg_index)
 }
 
 // neural network architecture
-//size_t arch[] = {3, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 1};
+//size_t arch[] = {3, 28, 16, 15, 14, 13, 12, 10, 6, 12, 7, 4, 3, 1};
 size_t arch[] = {3, 11, 18, 9, 4, 1};
 
 int main(int argc, char **argv)
@@ -259,7 +259,7 @@ int main(int argc, char **argv)
             int w = GetRenderWidth();
             int h = GetRenderHeight();
             float scale = h*0.009f;
-            float frame = h*0.08;
+            float frame = h*0.1;
 
             nf_v_layout_begin(VLO_HORZ, (CLITERAL(NF_V_Rect){frame,frame,w-2*frame,h-2*frame}), 3, 0);
             NF_V_Rect fsr = nf_v_layout_slot();
@@ -272,14 +272,15 @@ int main(int argc, char **argv)
             sprintf(buffer, "Epochs: %zu/%zu, Rate: %f", epoch, max_epoch, rate);
             DrawText(buffer, fsr.x+fsr.w + 50, 20, fsr.h*0.03f, RAYWHITE);
 
-            nf_v_slider(&rate, &lrate_scroll_dragging, fsr.x, fsr.y, fsr.w, 20);
+            nf_v_slider(&rate, &lrate_scroll_dragging, fsr.x + fsr.w*2 + 50, fsr.y - 80, fsr.w, 20);
+
             //nf_v_nn_render(nn, nf_v_layout_slot());
             NF_V_Rect nnr = nf_v_layout_slot();
             nnr.h -= 70;
             nnr.y += 30;
             nnr.w -= 70;
             nnr.x += 30;
-            nf_v_render_nn_as_cake(nn, nnr);
+            nf_v_render_nn_activations_heatmap(nn, nnr);
 
             NF_V_Rect isr = nf_v_layout_slot();
             isr.x += isr.w/12;

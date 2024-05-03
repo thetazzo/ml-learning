@@ -20,7 +20,7 @@ int main() {
             ClearBackground(BLACK);
             nf_v_layout_begin(VLO_HORZ, (CLITERAL(NF_V_Rect){0, 0, w, h}), 2, 0);
                 nf_v_render_nn(nn, nf_v_layout_slot());
-                nf_v_render_nn_as_cake(nn, nf_v_layout_slot());
+                nf_v_render_nn_activations_heatmap(nn, nf_v_layout_slot());
             nf_v_layout_end();
         EndDrawing();
     }
