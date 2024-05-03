@@ -10,7 +10,9 @@
 
 #define NF_BACKPROP_TRADITIONAL
 // TODO: reafacor this to be part of the NF_NN typedef
+#ifndef NF_NN_ACT
 #define NF_NN_ACT NF_ACT_LRELU
+#endif //NF_NN_ACT
 
 #ifndef NF_MALLOC
 #include <stdlib.h>
@@ -89,16 +91,11 @@ typedef struct {
 #define NF_NN_OUTPUT(nn) (nn).as[(nn).count]
 
 NF_NN nf_nn_alloc(size_t *arch, size_t arch_count);
-
 void nf_nn_fill(NF_NN nn, float a);
-
 void nf_nn_print(NF_NN nn, const char *name);
 #define NF_NN_PRINT(nn) nf_nn_print((nn), #nn) 
-
 void nf_nn_rand(NF_NN nn, float low, float high);
-
 void nf_nn_forward(NF_NN nn);
-
 float nf_nn_cost(NF_NN nn, NF_Mat ti, NF_Mat to);
 void nf_nn_finite_diff(NF_NN nn, NF_NN gn, float eps, NF_Mat ti, NF_Mat to);
 void nf_nn_backprop(NF_NN nn, NF_NN gn, NF_Mat ti, NF_Mat to);
