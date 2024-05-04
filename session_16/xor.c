@@ -16,13 +16,27 @@ NF_Mat prepare_training_data()
     return td;
 }
 
+void draw_xor_output(NF_NN nn, NF_V_Rect slot, Font font, float font_size)
+{
+    for (size_t i = 0; i < 2; i++) {
+        for (size_t j = 0; j < 2; j++) {
+            char buffer[256];
+            NF_MAT_AT(NF_NN_INPUT(nn),0,0) = i;
+            NF_MAT_AT(NF_NN_INPUT(nn),0,1) = j;
+            nf_nn_forward(nn);
+            snprintf(buffer, sizeof(buffer), "%zu ^ %zu = %f", i, j, NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0)); 
+            DrawTextEx(font, buffer, CLITERAL(Vector2){slot.x, slot.y + (2*i+j)*100}, font_size, 0, WHITE); 
+        }
+    }
+}
+
 #define F 120
 #define WIDTH 16*F
 #define HEIGHT 9*F
 
 size_t arch[] = {2, 2, 1};
 float rate = 0.5f;
-size_t max_epoch = 10000;
+size_t max_epoch = 15000;
 size_t batch_pre_frame = 100;
 bool running = false;
 
@@ -96,35 +110,12 @@ int main(void)
         root.h -= 200;
         nf_v_layout_begin(VLO_HORZ, root, 3, 0);
             char buffer[512];
-            snprintf(buffer, sizeof(buffer), "Epoch: %zu/%zu, Rate: %f, Cost: %f, Temporary Memory: %zu\n", epoch, max_epoch, rate, nf_nn_cost(nn, ti, to), region_occupied_bytes(&tmp_mem));
+            snprintf(buffer, sizeof(buffer), "Activation: %s, Epoch: %zu/%zu, Rate: %f, Cost: %f, Temporary Memory: %zu\n", activation_as_str(), epoch, max_epoch, rate, nf_nn_cost(nn, ti, to), region_occupied_bytes(&tmp_mem));
             DrawTextEx(font, buffer, CLITERAL(Vector2){root.x, root.y-100}, h*0.04, 0, WHITE); 
             nf_v_plot(plot, nf_v_layout_slot());
             nf_v_render_nn(nn, nf_v_layout_slot());
             NF_V_Rect out_slot = nf_v_layout_slot();
-            // --------------------------------------------------
-            NF_MAT_AT(NF_NN_INPUT(nn),0,0) = 0;
-            NF_MAT_AT(NF_NN_INPUT(nn),0,1) = 0;
-            nf_nn_forward(nn);
-            snprintf(buffer, sizeof(buffer), "0 ^ 0 = %f",NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0)); 
-            DrawTextEx(font, buffer, CLITERAL(Vector2){out_slot.x, out_slot.y + 0*100}, h*0.04, 0, WHITE); 
-            // --------------------------------------------------
-            NF_MAT_AT(NF_NN_INPUT(nn),0,0) = 0;
-            NF_MAT_AT(NF_NN_INPUT(nn),0,1) = 1;
-            nf_nn_forward(nn);
-            snprintf(buffer, sizeof(buffer), "0 ^ 1 = %f",NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0)); 
-            DrawTextEx(font, buffer, CLITERAL(Vector2){out_slot.x, out_slot.y + 1*100}, h*0.04, 0, WHITE); 
-            // --------------------------------------------------
-            NF_MAT_AT(NF_NN_INPUT(nn),0,0) = 1;
-            NF_MAT_AT(NF_NN_INPUT(nn),0,1) = 0;
-            nf_nn_forward(nn);
-            snprintf(buffer, sizeof(buffer), "1 ^ 0 = %f",NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0)); 
-            DrawTextEx(font, buffer, CLITERAL(Vector2){out_slot.x, out_slot.y + 2*100}, h*0.04, 0, WHITE); 
-            // --------------------------------------------------
-            NF_MAT_AT(NF_NN_INPUT(nn),0,0) = 1;
-            NF_MAT_AT(NF_NN_INPUT(nn),0,1) = 1;
-            nf_nn_forward(nn);
-            snprintf(buffer, sizeof(buffer), "1 ^ 1 = %f",NF_MAT_AT(NF_NN_OUTPUT(nn), 0, 0)); 
-            DrawTextEx(font, buffer, CLITERAL(Vector2){out_slot.x, out_slot.y + 3*100}, h*0.04, 0, WHITE); 
+            draw_xor_output(nn, out_slot, font, h*0.04f);
         nf_v_layout_end();
 
         EndDrawing();
