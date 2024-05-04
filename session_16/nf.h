@@ -39,6 +39,8 @@ typedef enum {
     NF_ACT_SIN,
 } NF_Act;
 
+char *activation_as_str();
+
 float nf_sigmoidf(float x);
 float nf_reluf(float x);
 float nf_lreluf(float x);
@@ -230,6 +232,25 @@ float rand_float(void)
 // ------------------------------------------
 //            Activation Functions
 // ------------------------------------------
+
+char *activation_as_str()
+{
+    switch (NF_NN_ACT) {
+        case NF_ACT_SIG:
+            return "SIGMOID";
+        case NF_ACT_RELU: 
+            return "RELU";
+        case NF_ACT_LRELU:
+            return "LEAKY RELU";
+        case NF_ACT_TANH:
+            return "TANH";
+        case NF_ACT_SIN:
+            return "SIN";
+        default:
+            NF_ASSERT(0 && "Unreachable");
+    }
+}
+
 float nf_sigmoidf(float x)
 {
     return 1.f / (1.f + expf(-x));
