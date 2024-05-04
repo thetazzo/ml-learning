@@ -197,7 +197,7 @@ typedef struct {
 void nf_v_widget(NF_V_Rect r);
 
 void nf_v_render_nn(NF_NN nn, NF_V_Rect r);
-void nf_v_plot_cost(NF_V_Plot plot, NF_V_Rect);
+void nf_v_plot(NF_V_Plot plot, NF_V_Rect);
 void nf_v_slider(float *value, bool *is_dragging, float rx, float ry, float rw, float rh);
 
 void nf_v_render_mat_as_heatmap(NF_Mat m, NF_V_Rect r,  size_t max_width);
@@ -846,7 +846,7 @@ void nf_v_render_nn(NF_NN nn, NF_V_Rect r) {
     }
 }
 
-void nf_v_plot_cost(NF_V_Plot plot, NF_V_Rect r) 
+void nf_v_plot(NF_V_Plot plot, NF_V_Rect r) 
 {
     float min = FLT_MAX;
     float max = FLT_MIN;
@@ -949,7 +949,7 @@ void nf_v_render_nn_weights_heatmap(NF_NN nn, NF_V_Rect r)
         }
     }
     nf_v_layout_begin(VLO_VERT, r, nn.arch_count-1, 10);
-    for (size_t i = 0; i < nn.arch_count; ++i) {
+    for (size_t i = 0; i < nn.arch_count-1; ++i) {
         nf_v_render_mat_as_heatmap(nn.ws[i], nf_v_layout_slot(), max_width);
     }
     nf_v_layout_end();

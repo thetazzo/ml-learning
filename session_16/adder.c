@@ -1,0 +1,173 @@
+#define NF_VISUALISATION
+#define NF_IMPLEMENTATION
+#include "nf.h"
+
+#define BITS 5
+
+size_t arch[] = {2*BITS, 4*BITS, BITS + 1};
+size_t epoch = 0;
+size_t max_epoch = 100*1000;
+size_t batches_per_frame = 200;
+size_t batch_size = 28;
+float rate = 1.0f;
+bool paused = true;
+
+void verify_nn_adder(Font font, NF_NN nn, NF_V_Rect r)
+{
+    float s;
+    if (r.w < r.h) {
+        s = r.w - r.w*0.05;
+        r.y = r.y + r.h/2 - s/2;
+    } else {
+        s = r.h - r.h*0.05;
+        r.x = r.x + r.w/2 - s/2;
+    }
+    size_t n = 1<<BITS;
+    float cs = s/n;
+
+    for (size_t x = 0; x < n; ++x) {
+        for (size_t y = 0; y < n; ++y) {
+            for (size_t i = 0; i < BITS; ++i) {
+                NF_MAT_AT(NF_NN_INPUT(nn), 0, i)        = (x>>i)&1;
+                NF_MAT_AT(NF_NN_INPUT(nn), 0, i + BITS) = (y>>i)&1;
+            }
+
+            nf_nn_forward(nn);
+
+            size_t z = 0.0f;
+            for (size_t i = 0; i < BITS; ++i) {
+                size_t bit = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, i) > 0.5;
+                z = z|(bit<<i);
+            }
+            bool overflow = NF_MAT_AT(NF_NN_OUTPUT(nn), 0, BITS) > 0.5;
+            bool correct = z == x + y;
+
+            Vector2 position = { r.x + x*cs, r.y + y*cs };
+            Vector2 size = { cs, cs };
+
+            if (correct)  DrawRectangleV(position, size, DARKGREEN);
+            if (overflow) DrawRectangleV(position, size, DARKPURPLE);
+
+            char buffer[256];
+            snprintf(buffer, sizeof(buffer), "%zu", z);
+
+            // Centering the text
+            float fontSize = cs*0.8;
+            float spacing = 0;
+            Vector2 text_size = MeasureTextEx(font, buffer, fontSize, spacing);
+            position.x = position.x + cs/2 - text_size.x/2;
+            position.y = position.y + cs/2 - text_size.y/2;
+
+            DrawTextEx(font, buffer, position, fontSize, spacing, WHITE);
+        }
+    }
+}
+
+int main(void)
+{
+    Region temp = region_alloc_alloc(256*1024*1024);
+
+    size_t n = (1<<BITS);
+    size_t rows = n*n;
+    NF_Mat t  = nf_mat_alloc(NULL, rows, 2*BITS + BITS + 1);
+    NF_Mat ti = {
+        .es = &NF_MAT_AT(t, 0, 0),
+        .rows = t.rows,
+        .cols = 2*BITS,
+        .stride = t.stride,
+    };
+    NF_Mat to = {
+        .es = &NF_MAT_AT(t, 0, 2*BITS),
+        .rows = t.rows,
+        .cols = BITS + 1,
+        .stride = t.stride,
+    };
+    for (size_t i = 0; i < ti.rows; ++i) {
+        size_t x = i/n;
+        size_t y = i%n;
+        size_t z = x + y;
+        for (size_t j = 0; j < BITS; ++j) {
+            NF_MAT_AT(ti, i, j)        = (x>>j)&1;
+            NF_MAT_AT(ti, i, j + BITS) = (y>>j)&1;
+            NF_MAT_AT(to, i, j)        = (z>>j)&1;
+        }
+        if (z >= n) {
+            for (size_t j = 0; j < BITS; ++j) {
+                NF_MAT_AT(to, i, j) = 1;
+            }
+            NF_MAT_AT(to, i, BITS) = 1;
+        } else {
+            NF_MAT_AT(to, i, BITS) = 0;
+        }
+    }
+
+    NF_NN nn = nf_nn_alloc(NULL, arch, NF_ARRAY_LEN(arch));
+    nf_nn_rand(nn, -1, 1);
+
+    size_t WINDOW_FACTOR = 80;
+    size_t WINDOW_WIDTH = (16*WINDOW_FACTOR);
+    size_t WINDOW_HEIGHT = (9*WINDOW_FACTOR);
+
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "xor");
+    SetTargetFPS(60);
+
+    Font font = LoadFontEx("./fonts/iosevka-term-ss02-regular.ttf", 72, NULL, 0);
+    SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
+
+    NF_V_Plot plot = {0};
+    Batch batch = {0};
+
+    while (!WindowShouldClose()) {
+        if (IsKeyPressed(KEY_SPACE)) {
+            paused = !paused;
+        }
+        if (IsKeyPressed(KEY_R)) {
+            epoch = 0;
+            nf_nn_rand(nn, -1, 1);
+            plot.count = 0;
+        }
+
+        for (size_t i = 0; i < batches_per_frame && !paused && epoch < max_epoch; ++i) {
+            nf_batch_process(&temp, &batch, batch_size, nn, t, rate);
+            if (batch.done) {
+                epoch += 1;
+                da_append(&plot, batch.cost);
+                nf_mat_shuffle_rows(t);
+            }
+        }
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+        {
+            int w = GetRenderWidth();
+            int h = GetRenderHeight();
+
+            NF_V_Rect r;
+            r.w = w;
+            r.h = h*2/3;
+            r.x = 0;
+            r.y = h/2 - r.h/2;
+
+            nf_v_layout_begin(VLO_HORZ, r, 3, 10);
+                nf_v_plot(plot, nf_v_layout_slot());
+                nf_v_layout_begin(VLO_VERT, nf_v_layout_slot(), 2, 0);
+                    nf_v_render_nn(nn, nf_v_layout_slot());
+                    nf_v_render_nn_weights_heatmap(nn, nf_v_layout_slot());
+                nf_v_layout_end();
+                verify_nn_adder(font, nn, nf_v_layout_slot());
+            nf_v_layout_end();
+
+            char buffer[256];
+            snprintf(buffer, sizeof(buffer), "Epoch: %zu/%zu, Rate: %f, Cost: %f, Temporary Memory: %zu\n", epoch, max_epoch, rate, nf_nn_cost(nn, ti, to), region_occupied_bytes(&temp));
+            DrawTextEx(font, buffer, CLITERAL(Vector2){}, h*0.04, 0, WHITE);
+        }
+        EndDrawing();
+
+        region_reset(&temp);
+    }
+
+
+    return 0;
+}
+
