@@ -59,6 +59,7 @@ typedef struct {
 // capacity is in bytes but it can allocate more just to keep words(data) alligned
 Region region_alloc_alloc(size_t capacity);
 void *region_alloc(Region *r, size_t size);
+// TODO: reset -> release
 #define region_reset(r) if (r) (r)->size_ = 0
 #define region_occupied_bytes(r) (NF_ASSERT((r) != NULL) , (r)->size_*sizeof(*(r)->words))
 

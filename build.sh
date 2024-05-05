@@ -71,7 +71,8 @@ raylib_clang() {
 # raylib_clang ./session_15/img2nn img2nn
 
 # Session 16
-# raylib_clang ./session_16/layout layout
-# raylib_clang ./session_16/adder adder
-raylib_clang ./session_16/xor xor
-# raylib_clang ./session_16/img2nn img2nn
+ raylib_clang ./session_16/demos/xor xor
+ raylib_clang ./session_16/demos/and and
+# raylib_clang ./session_16/demos/adder adder
+# raylib_clang ./session_16/demos/layout layout
+# raylib_clang ./session_16/demos/img2nn img2nn

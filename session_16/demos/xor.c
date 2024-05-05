@@ -1,6 +1,6 @@
 #define NF_VISUALISATION
 #define NF_IMPLEMENTATION
-#include "nf.h"
+#include "../nf.h"
 
 NF_Mat prepare_training_data()
 {

@@ -1,7 +1,7 @@
 #define NF_VISUALISATION
 #define NF_IMAGE_GENERATION
 #define NF_IMPLEMENTATION
-#include "nf.h"
+#include "../nf.h"
 
 char *p2m_shift_args(int *argc, char ***argv)
 {
