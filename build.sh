@@ -75,4 +75,4 @@ raylib_clang() {
  raylib_clang ./session_16/demos/and and
 # raylib_clang ./session_16/demos/adder adder
 # raylib_clang ./session_16/demos/layout layout
-# raylib_clang ./session_16/demos/img2nn img2nn
+ raylib_clang ./session_16/demos/img2nn img2nn

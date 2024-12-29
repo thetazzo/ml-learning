@@ -1,3 +1,5 @@
+#define NF_NN_ACT NF_ACT_SIG
+
 #define NF_VISUALISATION
 #define NF_IMAGE_GENERATION
 #define NF_IMPLEMENTATION
@@ -236,13 +238,13 @@ int main(int argc, char **argv)
 
             nf_v_layout_begin(VLO_HORZ, (CLITERAL(NF_V_Rect){frame,frame,w-2*frame,h-2*frame}), 3, 0);
             NF_V_Rect fsr = nf_v_layout_slot();
-            nf_v_plot_cost(plot, fsr);
+            nf_v_plot(plot, fsr);
 
             char buffer[256]; 
             sprintf(buffer, "Cost: %g", plot.count > 0 ? plot.items[plot.count - 1] : 0);
             DrawText(buffer, fsr.x+fsr.w + 100, fsr.y+fsr.h-40, fsr.h*0.05f, RAYWHITE);
 
-            sprintf(buffer, "Epochs: %zu/%zu, Rate: %f, Mem Usage: %d\n", epoch, max_epoch, rate, region_occupied_bytes(&temp));
+            sprintf(buffer, "Epochs: %zu/%zu, Rate: %f, Mem Usage: %lu\n", epoch, max_epoch, rate, region_occupied_bytes(&temp));
             DrawText(buffer, fsr.x+fsr.w + 50, 20, fsr.h*0.03f, RAYWHITE);
 
             nf_v_slider(&rate, &lrate_scroll_dragging, fsr.x + fsr.w*2 + 50, fsr.y - 80, fsr.w, 20);
@@ -253,7 +255,8 @@ int main(int argc, char **argv)
             nnr.y += 30;
             nnr.w -= 70;
             nnr.x += 30;
-            nf_v_render_nn_activations_heatmap(nn, nnr);
+            //nf_v_render_nn_activations_heatmap(nn, nnr);
+            nf_v_render_nn(nn, nnr);
 
             NF_V_Rect isr = nf_v_layout_slot();
             isr.x += isr.w/12;
